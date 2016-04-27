@@ -17,10 +17,18 @@ if ( ! ( -e $inputDir ) ) then
     exit
 endif
 
-mkdir -p $outputDir
 set roots=`ls -l $inputDir | grep '.root' | grep $rootname | awk '{print $9}'`
+if ( `echo $roots | grep root` == '' ) then
+    set roots=`ls -l $inputDir | grep '.root' | grep $rootname | awk '{print $8}'`
+endif
+
+if ( `echo $roots | grep root` == '' ) then
+    echo ">> No $rootname root files in $inputDir"
+    exit
+endif
 
 cmsenv
+mkdir -p $outputDir
 cd $inputDir
     hadd $outputDir'/'$rootname'.root' $roots
 cd -
