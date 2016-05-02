@@ -1,5 +1,6 @@
 {
-    const int i=runN; 
+    //const int i=runN; 
+    const int i=1; 
 
     // Options for CommPlotProducer4ttbar::Loop
     int trig_data=3;
@@ -34,7 +35,7 @@
     float xsec[Nsamples]   = {0, 831.77, 18610, 6025, 35.85, 35.85, 12.178, 47.13, 16.5 };
     float luminosity = 2488; // /pb  see mbuttign@lxplus0058:~/BTagCommissioningPlots/CMSSW_7_6_3/src/RecoBTag/PerformanceMeasurements/test/ttbar and do brilcalc lumi -i lumiSummary_MuonEG_CD.json
 
-    TString samplepath="root://cmseos.cern.ch//eos/cms/store/caf/user/jtsai/BTaggingCommission/Run2015_25ns";
+    TString samplepath="root://eoscms.cern.ch//eos/cms/store/caf/user/jtsai/BTaggingCommission/Run2015_25ns";
     TString sampleroot="MergedJetTree.root";
 
     // Run... 
