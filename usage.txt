@@ -59,16 +59,25 @@ allEventCount/hEventCount GetEntries()
                 pu : 1
                 c  : 2
                 lq : 3
-                data : 4    
+                data : 4   
+        * Datatype
+            1. AddHistottbar()
+               ttbar : 1  -> in HistoTTbar 0
+               DellY : 2  -> in HistoTTbar 1
+               SigleT: 3  -> in HistoTTbar 2
+               ww    : 4  -> in HistoTTbar 3
+               wz    : 5  -> in HistoTTbar 4
+               zz    : 6  -> in HistoTTbar 5
+               data  : 0  -> in HistoTTbar 6
+          
     * Store plots.
         * Jets related
             1. Count multiplicity for SF
-                nJets == 2 (pt>=30)
+        nJets == 2 (pt>=30)
                 Split 3 pT region <60, 60-120, 120-320
             2. multiplicity
             3. tracks in Jets
-                n-1 plots
-                3-leading tracks
+                n-1 plots                3-leading tracks
                 * Selections
                     nHits > 7 
                     nPix  > 1
