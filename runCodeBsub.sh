@@ -8,17 +8,18 @@ OUTPATH=OUTPATH_tmp
 
 BATCHDIR=${PWD}
 mkdir subdir 
-export SCRAM_ARCH=slc6_amd64_gcc481
+export SCRAM_ARCH=slc6_amd64_gcc493
 
 cd $WORKSPACE
     eval `scram runtime -sh`
-    cat runCode4ttbar.C | sed "s/runN/${RUNN}/g" >! $BATCHDIR/subdir/runCode4ttbar.C 
+    cp runCode4ttbar.C             $BATCHDIR/subdir/runCode4ttbar.C
     cp run.C                       $BATCHDIR/subdir/run.C 
     cp ../CommPlotProducer4ttbar.h $BATCHDIR/subdir/CommPlotProducer4ttbar.h
     cp ../CommPlotProducer4ttbar.C $BATCHDIR/subdir/CommPlotProducer4ttbar.C
     cp ../../common.h              $BATCHDIR/common.h
     cp ../../TTbarSelector.C       $BATCHDIR/TTbarSelector.C
     cp ../../TTbarSelector.h       $BATCHDIR/TTbarSelector.h
+    sed -i "s/runN/${RUNN}/g" $BATCHDIR/subdir/runCode4ttbar.C 
 
 cd $BATCHDIR/subdir
     root run.C -b -q
