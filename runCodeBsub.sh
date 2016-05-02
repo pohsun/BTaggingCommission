@@ -16,6 +16,7 @@ cd $WORKSPACE
     cp run.C                       $BATCHDIR/subdir/run.C 
     cp ../CommPlotProducer4ttbar.h $BATCHDIR/subdir/CommPlotProducer4ttbar.h
     cp ../CommPlotProducer4ttbar.C $BATCHDIR/subdir/CommPlotProducer4ttbar.C
+    cp ../../common.h              $BATCHDIR/common.h
     cp ../../TTbarSelector.C       $BATCHDIR/TTbarSelector.C
     cp ../../TTbarSelector.h       $BATCHDIR/TTbarSelector.h
 
