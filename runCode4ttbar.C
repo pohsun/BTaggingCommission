@@ -38,7 +38,7 @@
     TString sampleroot="MergedJetTree.root";
 
     // Run... 
-    TFile* f = new TFile(samplepath+"/"+iname[i]+"/"+sampleroot);
+    TFile* f = TFile::Open(samplepath+"/"+iname[i]+"/"+sampleroot);
     TChain* tree = (TChain*)f->Get("btagana/ttree");
     CommPlotProducer4ttbar *run = new CommPlotProducer4ttbar(tree,1,1);
 
