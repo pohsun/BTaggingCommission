@@ -2,6 +2,10 @@
 ## .py
 runBTagAnalyzer_cfg.py
 
+cmsRun runBTagAnalyzer_cfg.py maxEvents=100 reportEvery=1 wantSummary=True  useTTbarFilter=True
+
+useTTbarFilter=True
+
 process.btagana.useSelectedTracks = False 
 process.btagana.useTrackHistory = False 
 process.btagana.fillsvTagInfo = True 
@@ -24,19 +28,25 @@ MC13TeV_WZ
 MC13TeV_ZZ
 
 # Run2016 May (Updating...):
+
+dataset dataset=/TT_TuneCUETP8M1_13TeV-powheg-pythia8/*80X*/MINIAODSIM status=*
+
 # CMSSW_8_0_5_patch1
 # ttbar:
+# Example on cmseos: /afs/cern.ch/user/j/jtsai/eos/cms/store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/70000/60910103-2F20-E611-A5E6-02163E0115FF.root
+
 /TTTo2L2Nu_noSC_TuneCUETP8M1_alphaS01273_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 
 /ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 
-/WWTo2L2Nu_13TeV-powheg/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+/WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 /ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 
 
 # CMSSW_8_0_3_patch1
 # ttbar:
+/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/MINIAODSIM
 /TTTo2L2Nu_noSC_TuneCUETP8M1_alphaS01273_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM
 /TT_TuneCUETP8M1noCR_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM
 /TT_TuneCUETP8M1mpiOFF_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM
