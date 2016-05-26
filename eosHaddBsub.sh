@@ -1,14 +1,14 @@
 #!/bin/bash
 
-WORKSPACE="/afs/cern.ch/work/j/jtsai/BTagging/commissioning/CMSSW_7_6_3/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/BTaggingCommission"
+WORKSPACE="/afs/cern.ch/work/j/jtsai/BTagging/commissioning/CMSSW_8_0_5_patch1/src/RecoBTag/PerformanceMeasurements/test/ttbar/BTaggingCommission"
 
 ROOTNAME="MergedJetTree"
-INPATH="/eos/cms/store/caf/user/jtsai/BTaggingCommission/Run2015_25ns"
-OUTPATH="/eos/cms/store/caf/user/jtsai/BTaggingCommission/Run2015_25ns"
-SAMPLE="MC13TeV_TTJets_powheg_pythia8"
+INPATH="/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2016/miniAODv2"
+OUTPATH="/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2016/miniAODv2"
+SAMPLE="Data13TeV_MuonEG_2016B"
 
 BATCHDIR=${PWD}
-export SCRAM_ARCH=slc6_amd64_gcc481
+export SCRAM_ARCH=slc6_amd64_gcc530
 
 cd $WORKSPACE
     eval `scram runtime -sh`

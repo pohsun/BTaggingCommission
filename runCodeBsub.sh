@@ -8,7 +8,7 @@ OUTPATH=OUTPATH_tmp
 
 BATCHDIR=${PWD}
 mkdir subdir 
-export SCRAM_ARCH=slc6_amd64_gcc493
+export SCRAM_ARCH=slc6_amd64_gcc530
 
 cd $WORKSPACE
     eval `scram runtime -sh`

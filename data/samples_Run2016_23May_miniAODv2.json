@@ -1,0 +1,11 @@
+{
+"MC13TeV_WZ" : [65.9, 0, "/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "other", 4, false, false, 1],
+"MC13TeV_WW" : [11.6, 0, "/WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "other", 4, false, false, 1],
+"MC13TeV_ZZ" : [31.8, 0, "/ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "other", 4, false, false, 1],
+"Data13TeV_MuonEG_2016B" : [1, 1, "/MuonEG/Run2016B-PromptReco-v2/MINIAOD", "Data", 1, false, false, 0]
+}
+  
+
+
+
+

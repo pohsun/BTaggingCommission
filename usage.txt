@@ -244,3 +244,50 @@ DrawTTbar("nbtag_all_afterJetSel_cMVAv2M","number of b-tagged jets (cMVAv2M)",0)
 DrawTTbar("nbtag_all_afterJetSel_cMVAv2T","number of b-tagged jets (cMVAv2T)",0);
 
 DrawTTbar("njet","number of jets",0);
+
+
+############# Caculate lumi ##################
+[jtsai@lxplus023 jtsai]$ setenv PATH ${HOME}/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:${PATH}
+[jtsai@lxplus023 jtsai]$ pip install --install-option="--prefix=${HOME}/.local" brilws
+You are using pip version 7.0.3, however version 8.1.2 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+/afs/cern.ch/cms/lumi/brilconda-1.0.3/lib/python2.7/site-packages/pip/commands/install.py:197: UserWarning: Disabling all use of wheels due to the use of --build-options / --global-options / --install-options.
+  cmdoptions.check_install_build_global(options)
+Collecting brilws
+  Using cached brilws-2.0.2.tar.gz
+Installing collected packages: brilws
+  Running setup.py install for brilws
+Successfully installed brilws
+[jtsai@lxplus023 jtsai]$ brilcalc lumi -u /pb --normtag ~lumipro/public/normtag_file/normtag_DATACERT.json -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+#Data tag : online , Norm tag: composite
++-------------+-------------------+------+------+----------------+---------------+
+| run:fill    | time              | nls  | ncms | delivered(/pb) | recorded(/pb) |
++-------------+-------------------+------+------+----------------+---------------+
+| 273158:4915 | 05/11/16 20:42:35 | 1279 | 1279 | 53.934         | 50.634        |
+| 273291:4919 | 05/12/16 20:23:51 | 77   | 77   | 3.273          | 2.757         |
+| 273299:4919 | 05/12/16 21:55:32 | 43   | 43   | 1.867          | 1.748         |
+| 273301:4919 | 05/12/16 22:14:12 | 602  | 602  | 24.647         | 23.465        |
+| 273302:4919 | 05/13/16 02:13:38 | 459  | 459  | 17.075         | 16.380        |
+| 273402:4924 | 05/14/16 01:49:19 | 193  | 193  | 7.006          | 6.629         |
+| 273403:4924 | 05/14/16 03:05:27 | 53   | 53   | 1.932          | 1.834         |
+| 273404:4924 | 05/14/16 03:31:50 | 18   | 18   | 0.652          | 0.615         |
+| 273405:4924 | 05/14/16 03:42:09 | 25   | 25   | 0.902          | 0.839         |
+| 273406:4924 | 05/14/16 03:56:09 | 112  | 112  | 3.978          | 3.798         |
+| 273408:4924 | 05/14/16 04:52:04 | 6    | 6    | 0.211          | 0.182         |
+| 273409:4924 | 05/14/16 04:56:41 | 309  | 309  | 10.614         | 9.535         |
+| 273410:4924 | 05/14/16 06:59:49 | 90   | 90   | 3.006          | 2.762         |
+| 273411:4924 | 05/14/16 07:38:50 | 29   | 29   | 0.800          | 0.750         |
+| 273425:4925 | 05/14/16 11:17:57 | 671  | 671  | 26.668         | 25.357        |
+| 273446:4926 | 05/14/16 20:06:55 | 33   | 33   | 2.161          | 2.021         |
+| 273447:4926 | 05/14/16 20:26:09 | 408  | 408  | 25.678         | 24.449        |
+| 273449:4926 | 05/15/16 01:48:09 | 214  | 214  | 11.732         | 11.192        |
+| 273450:4926 | 05/15/16 03:19:37 | 643  | 643  | 32.253         | 30.883        |
++-------------+-------------------+------+------+----------------+---------------+
+#Summary:
++-------+------+------+------+-------------------+------------------+
+| nfill | nrun | nls  | ncms | totdelivered(/pb) | totrecorded(/pb) |
++-------+------+------+------+-------------------+------------------+
+| 5     | 19   | 5264 | 5264 | 228.390           | 215.829          |
++-------+------+------+------+-------------------+------------------+
+#Check JSON:
+#(run,ls) in json but not in results: [(273447, 32), (273447, 37), (273447, 41)]

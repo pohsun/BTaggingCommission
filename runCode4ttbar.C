@@ -1,6 +1,6 @@
 {
-    //const int i=runN; 
-    const int i=1; 
+    const int i=runN; 
+    //const int i=1; 
 
     // Options for CommPlotProducer4ttbar::Loop
     int trig_data=3;
@@ -8,15 +8,26 @@
     float PtMax_Cut=500;
     TString syst="";   
  
-    // Samples defination 
+    // Samples defination
+    //Data13TeV_MuonEG_2016B
+    //MC13TeV_DY10to50
+    //MC13TeV_DY50toInf
+    //MC13TeV_SingleT_tW
+    //MC13TeV_SingleTbar_tW
+    //MC13TeV_TTJets_powheg_pythia8
+    //MC13TeV_WW
+    //MC13TeV_WZ
+    //MC13TeV_ZZ
+    //
     const int Nsamples=9;
-    TString iname[Nsamples] = { "MC13TeV_DY10to50",              // 0
+    TString iname[Nsamples] = { "Data13TeV_MuonEG_2016B",        // 0
                                 "MC13TeV_TTJets_powheg_pythia8", // 1
                                 "MC13TeV_DY10to50",              // 2
                                 "MC13TeV_DY50toInf",             // 3
                                 "MC13TeV_SingleT_tW",            // 4
                                 "MC13TeV_SingleTbar_tW",         // 5
-                                "MC13TeV_WWTo2L2Nu",             // 6
+                                "MC13TeV_WW",                    // 6
+                                //"MC13TeV_WWTo2L2Nu",             // 6
                                 "MC13TeV_WZ",                    // 7 
                                 "MC13TeV_ZZ"                     // 8
                                 }; 
@@ -32,10 +43,11 @@
                                 };
  
     int datatype[Nsamples] = {0,      1,     2,    2,     3,     3,      4,     5,    6 }; 
-    float xsec[Nsamples]   = {0, 831.77, 18610, 6025, 35.85, 35.85, 12.178, 47.13, 16.5 };
-    float luminosity = 2488; // /pb  see mbuttign@lxplus0058:~/BTagCommissioningPlots/CMSSW_7_6_3/src/RecoBTag/PerformanceMeasurements/test/ttbar and do brilcalc lumi -i lumiSummary_MuonEG_CD.json
+    //float xsec[Nsamples]   = {0, 831.77, 18610, 6025, 35.85, 35.85, 12.178, 47.13, 16.5 };
+    float xsec[Nsamples]   = {0, 831.77, 18610, 6025, 35.85, 35.85, 118.7, 47.13, 16.5 };
+    float luminosity = 215.829; // /pb see usage.txt 
 
-    TString samplepath="root://eoscms.cern.ch//eos/cms/store/caf/user/jtsai/BTaggingCommission/Run2015_25ns";
+    TString samplepath="root://eoscms.cern.ch//eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2016/May2016_v0";
     TString sampleroot="MergedJetTree.root";
 
     // Run... 
