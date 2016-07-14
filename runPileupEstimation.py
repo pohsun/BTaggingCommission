@@ -3,7 +3,7 @@ import os,sys
 import json
 import commands
 import ROOT
-from SimGeneral.MixingModule.mix_2015_25ns_Startup_PoissonOOTPU_cfi import *
+from SimGeneral.MixingModule.mix_2016_25ns_SpringMC_PUScenarioV1_PoissonOOTPU_cfi import *
 
 """
 steer the script
@@ -11,12 +11,17 @@ steer the script
 def main():
 
     #configuration
+    # https://hypernews.cern.ch/HyperNews/CMS/get/luminosity/583/3.html
+
     usage = 'usage: %prog [options]'
     parser = optparse.OptionParser(usage)
-    parser.add_option('--json',      dest='inJson'  ,      help='json file with processed runs',      default=None,    type='string')
-    parser.add_option('--mbXsec',    dest='mbXsec'  ,      help='minimum bias cross section to use',  default=69000,   type=float)
-    parser.add_option('--puJson',    dest='puJson'  ,      help='pileup json file',      
+    parser.add_option('-j', '--json',      dest='inJson'  ,      help='json file with processed runs',      default=None,    type='string')
+    parser.add_option('-x', '--mbXsec',    dest='mbXsec'  ,      help='minimum bias cross section to use',  default=71300,   type=float)
+    parser.add_option('-p', '--puJson',    dest='puJson'  ,      help='pileup json file',      
                       default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt',    type='string')
+    parser.add_option('-N', '--normtag',   dest='normtagJson',   help='normtag',      
+                      default='/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json',    type='string')
+    parser.add_option('-o', '--output',    dest='outpath' ,      help='output path',                         default='./',    type='string')
     (opt, args) = parser.parse_args()
     
     #simulated pileup
@@ -27,29 +32,35 @@ def main():
         simPuH.SetBinContent(xbin,probVal)
     simPuH.Scale(1./simPuH.Integral())
 
+    cmd='setenv PATH ${HOME}/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:${PATH}'
+    commands.getstatusoutput(cmd)
     #compute pileup in data assuming different xsec
     puDist=[]
     puWgts=[]
     MINBIASXSEC={'nom':opt.mbXsec,'up':opt.mbXsec*1.1,'down':opt.mbXsec*0.9}
     for scenario in MINBIASXSEC:
         print scenario, 'xsec=',MINBIASXSEC[scenario]
-        cmd='pileupCalc.py -i %s --inputLumiJSON %s --calcMode true --minBiasXsec %f --maxPileupBin %d --numPileupBins %s Pileup.root'%(opt.inJson,opt.puJson,MINBIASXSEC[scenario],NPUBINS,NPUBINS)
+        #cmd='pileupCalc.py -i %s --inputLumiJSON %s --calcMode true --minBiasXsec %f --maxPileupBin %d --numPileupBins %s Pileup.root'%(opt.inJson,opt.puJson,MINBIASXSEC[scenario],NPUBINS,NPUBINS)
+        cmd='brilcalc lumi -b "STABLE BEAMS" -i %s -o Pileup.txt --normtag %s  --byls --minBiasXsec %f'%(opt.inJson,opt.normtagJson,MINBIASXSEC[scenario])
         commands.getstatusoutput(cmd)
 
-        fIn=ROOT.TFile.Open('Pileup.root')
-        pileupH=fIn.Get('pileup')
-        pileupH.Scale(1./pileupH.Integral())
-        puDist.append( ROOT.TGraph(pileupH) )
+        dataPuH=ROOT.TH1F('dataPuH'+scenario,'',NPUBINS,float(0),float(NPUBINS))
+        f = open('Pileup.txt', 'r')
+        for line in f:
+            if not line.startswith('#'):
+                dataPuH.Fill(float(line.split(',')[7]));
+
+        dataPuH.Scale(1./dataPuH.Integral())
+        puDist.append( ROOT.TGraph(dataPuH) )
         puDist[-1].SetName('pu_'+scenario)
 
-        pileupH.Divide(simPuH)
-        puWgts.append( ROOT.TGraph(pileupH) )
+        dataPuH.Divide(simPuH)
+        puWgts.append( ROOT.TGraph(dataPuH) )
         puWgts[-1].SetName('puwgts_'+scenario)
-        fIn.Close()
-    commands.getstatusoutput('rm Pileup.root')
-
+        commands.getstatusoutput('rm -f Pileup.txt')
     #save pileup weights to file
-    fOut=ROOT.TFile.Open('$CMSSW_BASE/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/pileupWgts.root','RECREATE')
+    #fOut=ROOT.TFile.Open('$CMSSW_BASE/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/pileupWgts.root','RECREATE')
+    fOut=ROOT.TFile.Open(opt.outpath+'/pileupWgts.root','RECREATE')
     for gr in puWgts: gr.Write()
     for gr in puDist: gr.Write()
     fOut.Close()
