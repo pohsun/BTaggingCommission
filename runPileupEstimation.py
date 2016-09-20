@@ -42,7 +42,9 @@ def main():
         print scenario, 'xsec=',MINBIASXSEC[scenario]
         #cmd='pileupCalc.py -i %s --inputLumiJSON %s --calcMode true --minBiasXsec %f --maxPileupBin %d --numPileupBins %s Pileup.root'%(opt.inJson,opt.puJson,MINBIASXSEC[scenario],NPUBINS,NPUBINS)
         cmd='brilcalc lumi -b "STABLE BEAMS" -i %s -o Pileup.txt --normtag %s  --byls --minBiasXsec %f'%(opt.inJson,opt.normtagJson,MINBIASXSEC[scenario])
+        #cmd='brilcalc lumi -b "STABLE BEAMS" -i %s -o Pileup.txt --byls --minBiasXsec %f'%(opt.inJson,MINBIASXSEC[scenario])
         commands.getstatusoutput(cmd)
+        print cmd
 
         dataPuH=ROOT.TH1F('dataPuH'+scenario,'',NPUBINS,float(0),float(NPUBINS))
         f = open('Pileup.txt', 'r')
