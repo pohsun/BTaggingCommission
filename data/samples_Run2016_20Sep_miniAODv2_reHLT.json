@@ -1,0 +1,4 @@
+{
+"MC13TeV_TTJets_powheg_pythia8" : [831.76, 0, "/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/MINIAODSIM", "t#bar{t}",                2, true, false,  1]
+}
+
