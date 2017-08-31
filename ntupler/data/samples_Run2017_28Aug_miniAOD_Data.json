@@ -1,0 +1,7 @@
+{
+    "Data13TeV_MuonEG_2017B-v1" : [ 1, 1, "/MuonEG/Run2017B-PromptReco-v1/MINIAOD", "Data", 1, false, false, 0],
+    "Data13TeV_MuonEG_2017B-v2" : [ 1, 1, "/MuonEG/Run2017B-PromptReco-v2/MINIAOD", "Data", 1, false, false, 0],
+    "Data13TeV_MuonEG_2017C-v1" : [ 1, 1, "/MuonEG/Run2017C-PromptReco-v1/MINIAOD", "Data", 1, false, false, 0],
+    "Data13TeV_MuonEG_2017C-v2" : [ 1, 1, "/MuonEG/Run2017C-PromptReco-v2/MINIAOD", "Data", 1, false, false, 0],
+    "Data13TeV_MuonEG_2017C-v3" : [ 1, 1, "/MuonEG/Run2017C-PromptReco-v3/MINIAOD", "Data", 1, false, false, 0]
+}
