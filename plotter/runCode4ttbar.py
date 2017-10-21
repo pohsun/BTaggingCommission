@@ -6,6 +6,7 @@ from subprocess import Popen, PIPE, call
 import fnmatch
 
 from ROOT import gROOT, TChain, TFile, TH1F
+gROOT.SetBatch()
 
 usage = """Usage: ./runAnalyzer4ttbar.py subcommand [options]\n
 Example: ./runAnalyzer4ttbar.py submit\n
@@ -56,7 +57,7 @@ def puEstimation(args):
         print "Please update the MixingModule first. Abort."
         return
     else:
-        json = os.path.join(CWD,args.json) if not args.json.startswith('/') else args.json
+        json = os.path.expandvars(args.json)
         xsecs = [63000,65000,67000,69000,71000,73000,75000]
 
         for xs in xsecs:
@@ -100,7 +101,8 @@ python {0} run CFG --pu "PUWGT"
         for iPath in data['ipath']:
             iFileList += fileLister(iPath)
 
-        puWgtUrl = data['puWgtUrl'] if os.path.expandvars(data['puWgtUrl']).startswith('/') else os.path.join(CWD,os.path.expandvars(data['puWgtUrl']))
+        data['puWgtUrl'] = os.path.expandvars(data['puWgtUrl'])
+        puWgtUrl = data['puWgtUrl'] if data['puWgtUrl'].startswith('/') else os.path.join(CWD,data['puWgtUrl'])
 
         # Split jobs
         for iPart in range(0,(len(iFileList)-1)/batchSize+1):
@@ -157,6 +159,9 @@ def runJob(args):
     run.Loop(isData, "output_{0}".format(dataset), inputWeight, syst)
     pass
 
+def hadd():
+    pass
+
 def merge(args):
     isJobsMerged = raw_input("Have you run hadd for output from CommPlotProducer4ttbar? [y/n] ")
     if isJobsMerged != 'y':
@@ -199,7 +204,7 @@ def merge(args):
             htemp = root_file.Get("TotalGenEvts")
             htemp.Print()
             nEventsAll = htemp.GetBinContent(1)
-            scale = groupVal['xsec'][datasetIdx]*groupVal['lumi']/nEventsAll if groupVal['xsec'][datasetIdx] > 0 else 1.
+            scale = float(groupVal['xsec'][datasetIdx]*groupVal['lumi'])/nEventsAll if groupVal['xsec'][datasetIdx] > 0 else 1.
             print "{0:10} -- Events: {1:.3f} (all); xsec: {2:.3E}; scale: {3:.3E}".format(datasetKey, nEventsAll, dataset[datasetKey]['xsec'], scale)
 
             # get the number of histograms
@@ -230,7 +235,8 @@ def merge(args):
 
 def drawAll(args):
     os.chdir(rootDir)
-    call("root drawAll.C")
+    gROOT.ProcessLine(".L DrawCommPlot4ttbar.C+")
+    from ROOT import Draw, DrawTTbar
     os.chdir(CWD)
     pass
 

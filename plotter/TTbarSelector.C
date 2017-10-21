@@ -139,14 +139,18 @@ bool TTbarSelector::passTrigger(bool isData, Int_t ttbar_chan, Int_t ttbar_trigW
     if(isData)
     {
         if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 0,ttbar_chan)); //Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL
-        if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 1,ttbar_chan)); //Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL
-        if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 2,ttbar_chan)); //Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL
+        if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 1,ttbar_chan)); //Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ
+        if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 2,ttbar_chan)); //Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
+        if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 3,ttbar_chan)); //Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL
+        if(ttbar_chan == -13*11) trigBits.push_back(make_pair( 4,ttbar_chan)); //Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL
     }            
     else
     {
         trigBits.push_back(make_pair( 0,-13*11)); //Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL
-        trigBits.push_back(make_pair( 1,-13*11)); //Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL
-        trigBits.push_back(make_pair( 2,-13*11)); //Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL
+        trigBits.push_back(make_pair( 1,-13*11)); //Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
+        trigBits.push_back(make_pair( 2,-13*11)); //Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
+        trigBits.push_back(make_pair( 3,-13*11)); //Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL
+        trigBits.push_back(make_pair( 4,-13*11)); //Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL
     }
 
 
