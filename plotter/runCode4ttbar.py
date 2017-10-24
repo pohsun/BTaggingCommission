@@ -19,7 +19,7 @@ rootDir = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements
 eosCmd          = '/usr/bin/eos'
 defaultQueue    = '8nh'
 batchSize       = 100
-CWD             = os.getcwd()
+CWD             = os.environ['PWD']
 
 # File listers
 def plainFileLister(ipath='.'):
@@ -57,11 +57,13 @@ def puEstimation(args):
         print "Please update the MixingModule first. Abort."
         return
     else:
-        json = os.path.expandvars(args.json)
+        json = os.path.normpath(args.json)
+        print json
         xsecs = [63000,65000,67000,69000,71000,73000,75000]
 
+        os.chdir(rootDir+'/../ttbar')
         for xs in xsecs:
-            cmd = "python {0}/../ttbar/runPileupEstimation.py --mbXsec={1} --json={2}".format(rootDir,str(xs),json)
+            cmd = "python runPileupEstimation.py --mbXsec={1} --json={2}".format(rootDir,str(xs),json)
             call(cmd, shell=True)
             cmd = "mv {0} {1}".format("{0}/../ttbar/data/pileupWgts.root".format(rootDir), os.path.splitext(json)[0]+'_puWgtXsec'+str(xs)+'.root')
             call(cmd, shell=True)
@@ -159,19 +161,23 @@ def runJob(args):
     run.Loop(isData, "output_{0}".format(dataset), inputWeight, syst)
     pass
 
-def hadd():
+def hadd(iDir, oDir, datasetName):
+    if not os.path.exists(oDir):
+        os.mkdir(oDir)
+    cmd = "hadd -f {0}/output_{2}.root {1}/output_{2}_part*.root".format(oDir, iDir, datasetName)
+    print cmd
+    call(cmd, shell=True)
     pass
 
 def merge(args):
-    isJobsMerged = raw_input("Have you run hadd for output from CommPlotProducer4ttbar? [y/n] ")
-    if isJobsMerged != 'y':
-        print "Please hadd the output first. Abort."
-        return
-
     # make sure all necessary input parameters are provided
     handle = open(args.cfg)
     exec handle in globals()
     handle.close()
+
+    for datasetName in dataset.keys():
+        if not os.path.exists("{0}/output_{1}.root".format(rootDir,datasetName)):
+            hadd(rootDir,os.path.join(rootDir,"ttbar"),datasetName)
 
     main_workdir = args.workDir
     # redefine main_workdir as an absolute path (if not defined in such form already)
@@ -234,10 +240,82 @@ def merge(args):
     pass
 
 def drawAll(args):
-    os.chdir(rootDir)
     gROOT.ProcessLine(".L DrawCommPlot4ttbar.C+")
     from ROOT import Draw, DrawTTbar
-    os.chdir(CWD)
+    os.chdir(rootDir)
+    if not os.path.exists("ttbar/Commissioning_plots"):
+        os.makedirs("ttbar/Commissioning_plots")
+
+    ### In BTV-15-001:
+    # Draw("track_IPs"                 , "3D IP significance of tracks"       , 1)
+    # Draw("sv_flight3DSig"            , "SV 3D flight distance significance" , 1)
+    # Draw("tagvarCSV_vertexmass_cat0" , "SV mass [GeV]"                      , 0)
+    # Draw("JP"                        , "JP discriminator"                   , 1)
+    # Draw("CSVv2"                     , "CSVv2 discriminator"                , 1)
+    # Draw("DeepCSVb"                  , "DeepCSV discriminator"              , 1)
+    # Draw("CSV"                       , "CSVv2(AVR) discriminator"           , 1)
+    # Draw("JBP"                       , "JBP discriminator"                  , 1)
+    # Draw("SoftMu"                    , "SM discriminator"                   , 1)
+    # Draw("SoftEl"                    , "SE discriminator"                   , 1)
+    # Draw("cMVAv2"                    , "cMVAv2 discriminator"               , 1)
+
+    # DrawTTbar("nbtag_all_afterJetSel_CSVv2M_SFapplied"                                                      , "number of b-tagged jets (CSVv2M)" , 0)
+    # DrawTTbar("nbtag_all_afterJetSel_CSVv2M"      ttbar/Commissioning_plots/nbtag_all_afterJetSel_CSVv2M.cc , "number of b-tagged jets (CSVv2M)" , 0)
+
+    ### In AN-16-036:
+    Draw("jet_pt_all"                    , "Jet pT"                                             , 1)
+    Draw("jet_eta"                       , "Jet eta"                                            , 0)
+    Draw("trk_multi_sel"                 , "Number of selected tracks in the jets"              , 0)
+    Draw("track_pt"                      , "Track p_{T}"                                        , 1)
+    Draw("track_nHit"                    , "number of hits"                                     , 0)
+    Draw("track_HPix"                    , "Number of hits in the Pixel"                        , 0)
+    Draw("track_chi2"                    , "Normalized #chi^{2} of tracks"                      , 1)
+    Draw("track_dist"                    , "Track distance to the jet axis"                     , 1)
+    Draw("track_len"                     , "Track decay length"                                 , 1)
+    Draw("track_IP"                      , "3D IP of tracks"                                    , 1)
+    Draw("track_IPs"                     , "3D IP significance of tracks"                       , 1)
+    Draw("track_IPs"                     , "3D IP significance of tracks"                       , 0)
+    Draw("sv_multi_0"                    , "nr. of SV including bin 0"                          , 1)
+    Draw("sv_flight3DSig"                , "SV 3D flight distance significance"                 , 1)
+    Draw("sv_deltaR_jet"                 , "Delta R between the jet and the SV direction."      , 0)
+    Draw("sv_phi"                        , "#phi"                                               , 0)
+    Draw("sv_eta"                        , "#eta"                                               , 0)
+    Draw("tagvarCSV_vertexmass_cat0"     , "massVertexEnergyFraction [GeV]"                     , 0)
+    Draw("tagvarCSV_vertexmass3trk_cat0" , "massVertexEnergyFraction (at least 3 tracks) [GeV]" , 0)
+    Draw("tagvarCSV_vertexCategory"      , "Vertex Category"                                    , 1)
+    Draw("pfmuon_multi"                  , "number of pf muons"                                 , 1)
+    Draw("pfmuon_pt"                     , "p_{T} of pf muons [GeV]"                            , 1)
+    Draw("pfmuon_ptrel"                  , "p_{T} rel. of pf muons [GeV]"                       , 0)
+    Draw("JP"                            , "JP discriminator"                                   , 1)
+    Draw("JBP"                           , "JBP discriminator"                                  , 1)
+    Draw("CSVv2"                         , "CSVv2 discriminator"                                , 1)
+    Draw("DeepCSVb"                      , "DeepCSVb discriminator"                             , 1)
+    Draw("DeepCSVbb"                     , "DeepCSVbb discriminator"                            , 1)
+    Draw("DeepCSVBDisc"                  , "DeepCSV discriminator"                              , 1)
+    Draw("cMVAv2"                        , "cMVAv2 discriminator"                               , 1)
+    Draw("CSV"                           , "CSVv2(AVR) discriminator"                           , 1)
+    Draw("CvsB"                          , "C-tag CvsB discriminator"                           , 1)
+    Draw("CvsL"                          , "C-tag CvsL discriminator"                           , 1)
+    Draw("SoftEl"                        , "SE discriminator"                                   , 1)
+    Draw("SoftMu"                        , "SM discriminator"                                   , 1)
+    Draw("TCHP"                          , "TCHP discriminator"                                 , 1)
+    Draw("discri_ssche0"                 , "SSVHE discriminator"                                , 1)
+
+    DrawTTbar("njet_pt30"                     , "number of jes"                     , 1)
+    DrawTTbar("nPV"                           , "number of PV"                      , 0)
+    DrawTTbar("met"                           , "MET [GeV]"                         , 0)
+    DrawTTbar("mll"                           , "M_{ll} [GeV]"                      , 0)
+    DrawTTbar("njet"                          , "number of jets"                    , 0)
+    #DrawTTbar("nbtag"                        , "number of btag jets"               , 0)
+    DrawTTbar("pt_e"                          , "Leading electron P_{T} [GeV]"      , 0)
+    DrawTTbar("pt_mu"                         , "Leading muon P_{T} [GeV]"          , 0)
+    DrawTTbar("pt_jet"                        , "Leading jet P_{T} [GeV]"           , 0)
+    DrawTTbar("nbtag_all_afterJetSel_CSVv2L"  , "number of b-tagged jets [CSVv2L]"  , 1)
+    DrawTTbar("nbtag_all_afterJetSel_CSVv2M"  , "number of b-tagged jets [CSVv2M]"  , 1)
+    DrawTTbar("nbtag_all_afterJetSel_CSVv2T"  , "number of b-tagged jets [CSVv2T]"  , 1)
+    DrawTTbar("nbtag_all_afterJetSel_cMVAv2L" , "number of b-tagged jets [cMVAv2L]" , 1)
+    DrawTTbar("nbtag_all_afterJetSel_cMVAv2M" , "number of b-tagged jets [cMVAv2M]" , 1)
+    DrawTTbar("nbtag_all_afterJetSel_cMVAv2T" , "number of b-tagged jets [cMVAv2T]" , 1)
     pass
 
 if __name__ == "__main__":
