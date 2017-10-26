@@ -354,7 +354,7 @@ if __name__ == "__main__":
         help="Datacard of datasets to be merged")
     subparserMerge.add_argument("-w", "--workDir", dest="workDir",
         help="Main working directory",
-        default=rootDir)
+        default=os.path.join(rootDir,"ttbar"))
     subparserMerge.add_argument("-o", "--output", dest="outputName",
         help="Output filename",
         default='output_all')
