@@ -69,7 +69,6 @@ def puEstimation(args):
             call(cmd, shell=True)
     pass
 
-
 def createBatch(args):
     defaultQueue    = "8nh"
     compileMacros(args)
@@ -97,6 +96,8 @@ python {0} run CFG --pu "PUWGT"
     if not os.path.isdir(scriptDir):
         os.makedirs(scriptDir)
     for datasetName, data in dataset.iteritems():
+        # if datasetName not in ['runE_v1','runF_v1']:
+        #     continue
         print "Creating batch jobs for {0}.".format(datasetName)
         # Get full list of input files
         iFileList = []

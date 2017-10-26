@@ -1426,10 +1426,10 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
                     //else if( Run < 275657 ) cat=17;
                     //else                    cat=18; // fill events for later run ranges
 
-                    FillHistoTTbar("nEvt_run", TString::Format("%d",cat).Data(), 1);
-                    if ( nbjet_ttbar_CSVv2_LWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2L", TString::Format("%d",cat).Data(), 1);
-                    if ( nbjet_ttbar_CSVv2_MWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2M", TString::Format("%d",cat).Data(), 1);
-                    if ( nbjet_ttbar_CSVv2_TWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2T", TString::Format("%d",cat).Data(), 1);
+                    FillHistoTTbar("nEvt_run", TString::Format("%d",Run).Data(), 1);
+                    if ( nbjet_ttbar_CSVv2_LWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2L", TString::Format("%d",Run).Data(), 1);
+                    if ( nbjet_ttbar_CSVv2_MWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2M", TString::Format("%d",Run).Data(), 1);
+                    if ( nbjet_ttbar_CSVv2_TWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2T", TString::Format("%d",Run).Data(), 1);
                 }
             }
 
