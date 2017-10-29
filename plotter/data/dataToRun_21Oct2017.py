@@ -9,7 +9,7 @@ dataset = {}
 # defaultLumi=3042. # In /pb, runB
 # defaultLumi=701.__package__ # In /pb, runB_23JunRereco
 # defaultLumi=11427. # In /pb, runB_v1, runB_v2, runC_v1~3, runD_v1
-defaultLumi= 9.055 # In /pb, runE_v1, runF_v1
+defaultLumi= 15.349 # In /pb, runE_v1, runF_v1
 defalutPUWgtUrl="/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20171021_PixelStudy/CMSSW_9_2_13/src/RecoBTag/PerformanceMeasurements/test/ttbar/21Oct2017_DATA/pileup.root"
 
 #Run2017_PromptReco
