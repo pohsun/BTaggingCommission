@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, string, re, copy
+import sys, os, shutil, string, re, copy
 import argparse
 from subprocess import Popen, PIPE, call
 import fnmatch
@@ -14,8 +14,8 @@ For more info: ./runAnalyzer4ttbar.py --help
 """
 
 # Settings
-rootDir = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros")
-# eosCmd          = '/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select'
+rootDir         = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros")
+scriptDir       = "/".join(os.path.realpath(__file__).split('/')[:-1])
 eosCmd          = '/usr/bin/eos'
 defaultQueue    = '8nh'
 batchSize       = 100
@@ -46,6 +46,10 @@ def writeJobScript(ifname,ofname,ifPathType='eos'):
 def compileMacros(args):
     os.chdir(rootDir)
     if args.compile or not os.path.exists("CommPlotProducer4ttbar_C.so"):
+        shutil.copy(os.path.join(scriptDir,"TTbarSelector.h"), os.path.join(rootDir,".."))
+        shutil.copy(os.path.join(scriptDir,"TTbarSelector.C"), os.path.join(rootDir,".."))
+        shutil.copy(os.path.join(scriptDir,"CommPlotProducer4ttbar.h"), os.path.join(rootDir))
+        shutil.copy(os.path.join(scriptDir,"CommPlotProducer4ttbar.C"), os.path.join(rootDir))
         gROOT.ProcessLine(".L ../TTbarSelector.C++")
         gROOT.ProcessLine(".L CommPlotProducer4ttbar.C++g")
     os.chdir(CWD)
@@ -58,12 +62,12 @@ def puEstimation(args):
         return
     else:
         json = os.path.normpath(args.json)
-        print json
+        puJson = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/pileup_latest.txt"
         xsecs = [63000,65000,67000,69000,71000,73000,75000]
 
         os.chdir(rootDir+'/../ttbar')
         for xs in xsecs:
-            cmd = "python runPileupEstimation.py --mbXsec={1} --json={2}".format(rootDir,str(xs),json)
+            cmd = "python runPileupEstimation.py --mbXsec={1} --json={2} --puJson={3}".format(rootDir,str(xs),json,puJson)
             call(cmd, shell=True)
             cmd = "mv {0} {1}".format("{0}/../ttbar/data/pileupWgts.root".format(rootDir), os.path.splitext(json)[0]+'_puWgtXsec'+str(xs)+'.root')
             call(cmd, shell=True)
@@ -158,7 +162,7 @@ def runJob(args):
             f.Close()
         tree.Add(iFile)
     url = args.puWgtUrl if os.path.expandvars(args.puWgtUrl).startswith('/') else os.path.join(CWD,args.puWgtUrl)
-    run = CommPlotProducer4ttbar(tree,1,1,0,url)
+    run = CommPlotProducer4ttbar(tree,True,True,False,url)
     run.Loop(isData, "output_{0}".format(dataset), inputWeight, syst)
     pass
 
@@ -293,6 +297,7 @@ def drawAll(args):
     Draw("DeepCSVb"                      , "DeepCSVb discriminator"                             , 1)
     Draw("DeepCSVbb"                     , "DeepCSVbb discriminator"                            , 1)
     Draw("DeepCSVBDisc"                  , "DeepCSV discriminator"                              , 1)
+    Draw("DeepFlavourBDisc"              , "DeepFlavour b discriminator"                        , 1)
     Draw("cMVAv2"                        , "cMVAv2 discriminator"                               , 1)
     Draw("CSV"                           , "CSVv2(AVR) discriminator"                           , 1)
     Draw("CvsB"                          , "C-tag CvsB discriminator"                           , 1)
@@ -364,7 +369,6 @@ if __name__ == "__main__":
     subparserDraw.set_defaults(func=drawAll)
 
     args = parser.parse_args()
-    compileMacros(args)
     args.func(args)
 
     sys.exit()

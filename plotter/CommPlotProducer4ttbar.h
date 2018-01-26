@@ -136,6 +136,7 @@ public :
    Float_t         Jet_CombIVF_P[1000];   //[nJet]
    Float_t         Jet_DeepCSVb[1000];  //[nJet]
    Float_t         Jet_DeepCSVbb[1000];  //[nJet]
+   Float_t         Jet_DeepFlavourBDisc[1000]; //[nJet]
    //Float_t         Jet_RetCombSvxN[1000];   //[nJet]
    //Float_t         Jet_RetCombSvxP[1000];   //[nJet]
    //Float_t         Jet_RetCombSvx[1000];   //[nJet]
@@ -445,6 +446,7 @@ public :
    TBranch        *b_Jet_CombIVF_P;   //!
    TBranch        *b_Jet_DeepCSVb; //!
    TBranch        *b_Jet_DeepCSVbb; //!
+   TBranch        *b_Jet_DeepFlavourBDisc;
    //TBranch        *b_Jet_RetCombSvxN;   //!
    //TBranch        *b_Jet_RetCombSvxP;   //!
    //TBranch        *b_Jet_RetCombSvx;   //!
@@ -852,6 +854,7 @@ void CommPlotProducer4ttbar::Init(TChain *tree)
    fChain->SetBranchAddress("Jet_CombIVF_P", Jet_CombIVF_P, &b_Jet_CombIVF_P);
    fChain->SetBranchAddress("Jet_DeepCSVb", Jet_DeepCSVb, &b_Jet_DeepCSVb);
    fChain->SetBranchAddress("Jet_DeepCSVbb", Jet_DeepCSVbb, &b_Jet_DeepCSVbb);
+   fChain->SetBranchAddress("Jet_DeepFlavourBDisc", Jet_DeepFlavourBDisc, &b_Jet_DeepFlavourBDisc);
      fChain->SetBranchAddress("Jet_SoftMuN", Jet_SoftMuN, &b_Jet_SoftMuN);
      fChain->SetBranchAddress("Jet_SoftMu", Jet_SoftMu, &b_Jet_SoftMu);
    fChain->SetBranchAddress("Jet_hist1", Jet_hist1, &b_Jet_hist1);

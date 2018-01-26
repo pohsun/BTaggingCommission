@@ -31,13 +31,12 @@ TString output="Commissioning_plots/";
 TString CMStitle= "CMS";
 TString Preliminarytitle= "Preliminary";
 TString Selectiontitle= "e#mu channel, #geq 2 jets";
-TString Lumititle= "0.701 fb^{-1} (13 TeV, 2017)";
-//TString title= "CMS 2015 preliminary, #sqrt{s} = 13 TeV,  2.44 fb^{-1}";
+TString Lumititle= "41.860 fb^{-1} (13 TeV, 2017)";
 TString format1=".pdf"; // .png or .pdf or .gif
 TString format2=".png"; // .png or .pdf or .gif
-bool bOverflow=true;
-bool b_ordering=true;
-bool web = true;
+bool bOverflow  =true;
+bool b_ordering =true;
+bool web        =true;
 
 // Configuration for CTag commissioning //
 bool c_ordering=false;
@@ -52,7 +51,7 @@ void OverFlowBinFix(TH1D* );
 
 void DrawCommPlot(bool Draw_track_plots, bool Draw_Nminus1_plots, bool Draw_sv_plots, bool Draw_muons_plots, bool Draw_discriminator_plots , 
 bool Draw_newdiscriminator_plots, bool Draw_tagRate_plots, bool Draw_2D_plots)
-{
+{//{{{
 
   TString action = "mkdir ttbar/Commissioning_plots";
   system(action);
@@ -68,12 +67,12 @@ bool Draw_newdiscriminator_plots, bool Draw_tagRate_plots, bool Draw_2D_plots)
   DrawTTbar("pt_mu","Leading muon p_{T} [GeV]",0);
   DrawTTbar("pt_jet","Leading jet p_{T} [GeV]",0);
 
-}
+}//}}}
 
 //--------------------------
 
 void Draw(TString name, TString histotitle, bool log, int move_legend)
-{
+{//{{{
 
  if(c_ordering){
     //Muon channel//
@@ -109,6 +108,7 @@ void Draw(TString name, TString histotitle, bool log, int move_legend)
  //hist_gsplit    = (TH1D*)gROOT->FindObject(name+"_bfromg_mc");
  hist_l         = (TH1D*)gROOT->FindObject(name+"_l_mc");
  hist_data      = (TH1D*)gROOT->FindObject(name+"_data");
+ hist_b->Print();
  
 
  if (bOverflow && name!="SSV" && name!="SSVHP") 
@@ -121,10 +121,10 @@ void Draw(TString name, TString histotitle, bool log, int move_legend)
    OverFlowBinFix(hist_data);
  }
 
- TH1D* histo_tot = (TH1D*) hist_b->Clone();
+ TH1D* histo_tot = (TH1D*) hist_b->Clone("histo_tot");
  histo_tot->Sumw2();
  histo_tot ->Add(hist_c);
- histo_tot ->Add(hist_l);  
+ histo_tot ->Add(hist_l);
  histo_tot ->Add(hist_pu);
  //histo_tot ->Add(hist_gsplit);
 
@@ -139,11 +139,12 @@ void Draw(TString name, TString histotitle, bool log, int move_legend)
  //hist_gsplit  ->Scale(scale_f);
  hist_l       ->Scale(scale_f);
  histo_tot    ->Scale(scale_f);
+ histo_tot->Print();
   
  TH1D* histo_ratio;
- histo_ratio = (TH1D*) hist_data->Clone();
- histo_ratio->SetName("histo_ratio");
+ histo_ratio = (TH1D*) hist_data->Clone("histo_ratio");
  histo_ratio->SetTitle("");
+ histo_ratio->Print();
   
  histo_ratio->Divide(histo_tot);
   
@@ -384,22 +385,24 @@ void Draw(TString name, TString histotitle, bool log, int move_legend)
  histo_ratio->SetMinimum(0.4);
  histo_ratio->SetMaximum(1.6);
  histo_ratio->Draw("E1X0");
+ histo_ratio->Print();
 
- c1->cd();  
+ c1->cd();
   
  TString name_plot1=name+"_Linear"+format1; 
  if(log) name_plot1=name+"_Log"+format1;
  TString name_plot2=name+"_Linear"+format2; 
  if(log) name_plot2=name+"_Log"+format2;
- c1->SaveAs("ttbar/"+output+name_plot1);
- c1->SaveAs("ttbar/"+output+name_plot2);
+ c1->Print("ttbar/"+output+name_plot1);
+ c1->Print("ttbar/"+output+name_plot2);
  c1->SaveSource("ttbar/"+output+name+".cc");
-}
+ printf("Draw(%s)\n",name.Data());
+}//}}}
 
 //--------------------------
 
 void DrawTTbar(TString name, TString histotitle, bool log, int move_legend)
-{
+{//{{{
 
  
  if(name.SubString("afterJetSel") == "afterJetSel") Selectiontitle= "e#mu channel, = 2 jets";
@@ -520,7 +523,7 @@ void DrawTTbar(TString name, TString histotitle, bool log, int move_legend)
  else  stack->SetMinimum(0.);
 
  stack    ->Draw("hist");  
-  
+
  stack    ->GetHistogram()->SetTitleSize(0.08,"Y");
  stack    ->GetHistogram()->SetTitleOffset(0.81,"Y"); 
 
@@ -665,18 +668,15 @@ void DrawTTbar(TString name, TString histotitle, bool log, int move_legend)
  if(log) name_plot2="ttbar_"+name+"_Log"+format2;
  c1->SaveAs("ttbar/Commissioning_plots/"+name_plot1);
  c1->SaveAs("ttbar/Commissioning_plots/"+name_plot2);
- c1->SaveSource("ttbar/Commissioning_plots/"+name+".cc");
+ c1->SaveSource("ttbar/Commissioning_plots/ttbar_"+name+".cc");
 
 
-}
-
-
+}//}}}
 
 //--------------------------
 
-
 void DrawTagRate(TString name, TString histotitle, bool log)
-{
+{//{{{
 
 
  TH1D* hist_b;
@@ -918,14 +918,12 @@ void DrawTagRate(TString name, TString histotitle, bool log)
   c1->SaveAs("ttbar/Commissioning_plots/"+name_plot1);
   c1->SaveAs("ttbar/Commissioning_plots/"+name_plot2);
   c1->SaveSource("ttbar/Commissioning_plots/"+name+".cc");
-}
-
+}//}}}
 
 //--------------------------
 
-
 void Draw2DPlot(TString name, TString histotitle, TString titleX, TString titleY, bool log)
-{
+{//{{{
 
  TH2D* hist_b;
  TH2D* hist_c;
@@ -1081,12 +1079,12 @@ void Draw2DPlot(TString name, TString histotitle, TString titleX, TString titleY
   canvas->SaveAs("ttbar/Commissioning_plots/"+name_plot2);
   canvas->SaveSource("ttbar/Commissioning_plots/"+name+".cc");
 
-}
+}//}}}
 
 //------------
 
 void OverFlowBinFix(TH1D* histo)
-{
+{//{{{
 
   Float_t val, errval;
 
@@ -1113,5 +1111,5 @@ void OverFlowBinFix(TH1D* histo)
   histo->SetBinError(highbin,errval);
   histo->SetBinContent(highbin+1,0);
   histo->SetBinError(highbin+1,0);
-}
+}//}}}
 

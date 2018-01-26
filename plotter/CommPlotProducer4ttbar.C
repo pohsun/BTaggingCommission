@@ -89,7 +89,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         AddHistoTTbar("nPV_unweighted", "unweighted number of PV",    50,-0.5,49.5);
         AddHistoTTbar("met",            "MET",                        30,  0.,300.);
         AddHistoTTbar("mll",            "M_{ll}",                     60,  0.,300.);
-        AddHistoTTbar("njet",           "number of jets",         10,-0.5, 9.5);
+        AddHistoTTbar("njet",           "number of jets",             10,-0.5, 9.5);
         AddHistoTTbar("njet_pt30",      "number of jets pt30",        10,-0.5, 9.5);
         AddHistoTTbar("pt_e",           "P_{T}^{e}",                  50,  0.,200.);
         AddHistoTTbar("pt_mu",          "P_{T}^{#mu}",                50,  0.,200.);
@@ -100,6 +100,15 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         AddHistoTTbar("nEvt_run_CSVv2L",   "number of evt VS run(b-jet csvl)",      20,  0,  20);
         AddHistoTTbar("nEvt_run_CSVv2M",   "number of evt VS run(b-jet csvm)",      20,  0,  20);
         AddHistoTTbar("nEvt_run_CSVv2T",   "number of evt VS run(b-jet csvt)",      20,  0,  20);
+        AddHistoTTbar("nEvt_run_2Jet",     "number of evt VS run(2 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_3Jet",     "number of evt VS run(3 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_4Jet",     "number of evt VS run(4 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_5Jet",     "number of evt VS run(5 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_6Jet",     "number of evt VS run(6 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_7Jet",     "number of evt VS run(7 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_8Jet",     "number of evt VS run(8 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_9Jet",     "number of evt VS run(9 Jets)",          20,  0,  20);
+        AddHistoTTbar("nEvt_run_MoreJet",  "number of evt VS run(>9 Jets)",         20,  0,  20);
 
         AddHistoTTbar("nbtag_CSVv2T","number of btag jets (tight WP)",             6,-0.5,5.5);
         AddHistoTTbar("nbtag_CSVv2M","number of btag jets (medium WP)",            6,-0.5,5.5);
@@ -434,6 +443,8 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         AddHistoBtag("DeepCSVbb"    ,"DeepCSVbb",          50,0.,1.  );
         AddHistoBtag("DeepCSVBDisc"     ,"DeepCSVBDisc",           50,0.,1.  );
         AddHistoBtag("DeepCSVbpu"   ,"DeepCSVbpu",             50,0.,1.  );
+        AddHistoBtag("DeepFlavourBDisc"     ,"DeepFlavourBDisc",           50,0.,1.  );
+        AddHistoBtag("DeepFlavourBDiscpu"   ,"DeepFlavourBDiscpu",             50,0.,1.  );
         AddHistoBtag("cMVAv2"   ,"cMVAv2",                     50,-1.,1. );
         AddHistoBtag("CvsB"     ,"CvsB",                                       50,-1.,1. );
         AddHistoBtag("CvsL"     ,"CvsL",                                       50,-1.,1. );
@@ -636,9 +647,10 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         Float_t puWgtLo(1.0), puWgtNom(1.0), puWgtHi(1.0);
         if(!isData)
         {
-            if(puWgtGr_)     puWgtNom = puWgtGr_->Eval(nPUtrue);
-            if(puWgtDownGr_) puWgtLo  = puWgtDownGr_->Eval(nPUtrue);
-            if(puWgtUpGr_)   puWgtHi  = puWgtUpGr_->Eval(nPUtrue);
+            // Hot patch to be fixed for future high PU situation!
+            if(puWgtGr_)     puWgtNom = nPUtrue < 95 && nPUtrue >= 0 ? puWgtGr_->Eval(nPUtrue) : 0;
+            if(puWgtDownGr_) puWgtLo  = nPUtrue < 95 && nPUtrue >= 0 ? puWgtDownGr_->Eval(nPUtrue) : 0;
+            if(puWgtUpGr_)   puWgtHi  = nPUtrue < 95 && nPUtrue >= 0 ? puWgtUpGr_->Eval(nPUtrue) : 0;
         }
 
 
@@ -655,7 +667,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         if(     syst == "PU__minus") ww *= puWgtLo/puWgtNom;
         else if(syst == "PU__plus" ) ww *= puWgtHi/puWgtNom;
 
-        //if(output_name == "output_dy1") cout << "evtwgt = " << ww << endl;
+        //if(output_name == "output_ttbar") cout << "evtwgt = " << ww << endl;
 
         // To rescale PU reweighting with ratio of sum of weights (at the end)
         if(!isData)
@@ -722,6 +734,12 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         int nbjet_ttbar_cMVAv2_TWP =0;
         int nbjet_ttbar_cMVAv2_MWP =0;
         int nbjet_ttbar_cMVAv2_LWP =0;
+        int nbjet_ttbar_DeepCSV_TWP=0;
+        int nbjet_ttbar_DeepCSV_MWP=0;
+        int nbjet_ttbar_DeepCSV_LWP=0;
+        int nbjet_ttbar_DeepFlavourBDisc_TWP=0;
+        int nbjet_ttbar_DeepFlavourBDisc_MWP=0;
+        int nbjet_ttbar_DeepFlavourBDisc_LWP=0;
         float ptjet_ttbar=0;
 
         int nbjet_afterJetSel_ttbar_CSVv2_TWP =0;
@@ -730,6 +748,12 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
         int nbjet_afterJetSel_ttbar_cMVAv2_TWP =0;
         int nbjet_afterJetSel_ttbar_cMVAv2_MWP =0;
         int nbjet_afterJetSel_ttbar_cMVAv2_LWP =0;
+        int nbjet_afterJetSel_ttbar_DeepCSVb_TWP=0;
+        int nbjet_afterJetSel_ttbar_DeepCSVb_MWP=0;
+        int nbjet_afterJetSel_ttbar_DeepCSVb_LWP=0;
+        int nbjet_afterJetSel_ttbar_DeepFlavourBDisc_TWP=0;
+        int nbjet_afterJetSel_ttbar_DeepFlavourBDisc_MWP=0;
+        int nbjet_afterJetSel_ttbar_DeepFlavourBDisc_LWP=0;
 
         int n_ttbar_bgenjet =0;
         int n_ttbar_cgenjet =0;
@@ -788,22 +812,22 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
 
                     if(!isData && fabs(flav) == 5)
                     {
-                        //if( theRand_->Uniform(1.) <= 0.477369)  n_ttbar_applySF++;  //CSVv2T
-                        if( theRand_->Uniform(1.) <= 0.687265)  n_ttbar_applySF++; //CSVv2M
-                        //if( theRand_->Uniform(1.) <= 0.684196)  n_ttbar_applySF++; //CSVv2M
+                        if( theRand_->Uniform(1.) <= 0.8484)  n_ttbar_applySF++; //CSVv2M 80X
                     }
-                    //else if (Jet_CombIVF[newJetIndex] > 0.935) n_ttbar_applySF++;  //CSVv2T
-                    else if (Jet_CombIVF[newJetIndex] > 0.800) n_ttbar_applySF++;  //CSVv2M
+                    else if (Jet_CombIVF[newJetIndex] > 0.8484) n_ttbar_applySF++;  //CSVv2M 80X
 
-                    if (Jet_CombIVF[newJetIndex] > 0.935) nbjet_afterJetSel_ttbar_CSVv2_TWP++; // Tight WP for 76X
-                    if (Jet_CombIVF[newJetIndex] > 0.800) nbjet_afterJetSel_ttbar_CSVv2_MWP++; // Medium WP for 76X
-                    if (Jet_CombIVF[newJetIndex] > 0.460) nbjet_afterJetSel_ttbar_CSVv2_LWP++; // Loose WP for 76X
-                    if (Jet_cMVAv2[newJetIndex] > 0.875) nbjet_afterJetSel_ttbar_cMVAv2_TWP++; // Tight WP for 76X
-                    if (Jet_cMVAv2[newJetIndex] > 0.185) nbjet_afterJetSel_ttbar_cMVAv2_MWP++; // Medium WP for 76X
-                    if (Jet_cMVAv2[newJetIndex] > -0.715) nbjet_afterJetSel_ttbar_cMVAv2_LWP++; // Loose WP for 76X
-                    //if (Jet_DeepCSVb[newJetIndex] > 0.2219) nbjet_afterJetSel_ttbar_DeepCSVb_TWP++; // Tight WP for 76X
-                    //if (Jet_DeepCSVb[newJetIndex] > 0.6324) nbjet_afterJetSel_ttbar_DeepCSVb_MWP++; // Medium WP for 76X
-                    //if (Jet_DeepCSVb[newJetIndex] > 0.8958) nbjet_afterJetSel_ttbar_DeepCSVb_LWP++; // Loose WP for 76X
+                    if (Jet_CombIVF[newJetIndex]  > 0.9535) nbjet_afterJetSel_ttbar_CSVv2_TWP++;    // Tight WP for     80X
+                    if (Jet_CombIVF[newJetIndex]  > 0.8484) nbjet_afterJetSel_ttbar_CSVv2_MWP++;    // Medium WP for    80X
+                    if (Jet_CombIVF[newJetIndex]  > 0.5426) nbjet_afterJetSel_ttbar_CSVv2_LWP++;    // Loose WP for     80X
+                    if (Jet_cMVAv2 [newJetIndex]  > 0.9432) nbjet_afterJetSel_ttbar_cMVAv2_TWP++;   // Tight WP for     80X
+                    if (Jet_cMVAv2 [newJetIndex]  > 0.4432) nbjet_afterJetSel_ttbar_cMVAv2_MWP++;   // Medium WP for    80X
+                    if (Jet_cMVAv2 [newJetIndex]  >-0.5884) nbjet_afterJetSel_ttbar_cMVAv2_LWP++;   // Loose WP for     80X
+                    if (Jet_DeepCSVb[newJetIndex] > 0.1522) nbjet_afterJetSel_ttbar_DeepCSVb_TWP++; // Tight WP for     94X
+                    if (Jet_DeepCSVb[newJetIndex] > 0.4941) nbjet_afterJetSel_ttbar_DeepCSVb_MWP++; // Medium WP for    94X
+                    if (Jet_DeepCSVb[newJetIndex] > 0.8001) nbjet_afterJetSel_ttbar_DeepCSVb_LWP++; // Loose WP for     94X
+                    if (Jet_DeepFlavourBDisc[newJetIndex] > 0.0574) nbjet_afterJetSel_ttbar_DeepFlavourBDisc_TWP++; // Tight WP for     94X
+                    if (Jet_DeepFlavourBDisc[newJetIndex] > 0.4318) nbjet_afterJetSel_ttbar_DeepFlavourBDisc_MWP++; // Medium WP for    94X
+                    if (Jet_DeepFlavourBDisc[newJetIndex] > 0.9068) nbjet_afterJetSel_ttbar_DeepFlavourBDisc_LWP++; // Loose WP for     94X
 
                 }
             }
@@ -844,6 +868,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
             float csv_v2   = Jet_CombIVF[newJetIndex];
             float deepcsvB = Jet_DeepCSVb[newJetIndex];
             float deepcsvBB= Jet_DeepCSVbb[newJetIndex];
+            float deepflavourBDisc  = Jet_DeepFlavourBDisc[newJetIndex];
             float cmva_v2  = Jet_cMVAv2[newJetIndex];
             float cvsB     = CTag_Jet_CvsB[newJetIndex];
             float cvsL     = CTag_Jet_CvsL[newJetIndex];
@@ -872,15 +897,18 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
                 }
                 else njet_data++;
 
-                if (csv_v2>0.935)   nbjet_ttbar_CSVv2_TWP++; // Tight WP for 76X
-                if (csv_v2>0.800)   nbjet_ttbar_CSVv2_MWP++; // Medium WP for 76X
-                if (csv_v2>0.460)   nbjet_ttbar_CSVv2_LWP++; // Loose WP for 76X
-                //if (deepcsvB>0.2219)   nbjet_ttbar_DeepCSV_TWP++; // Tight WP for 76X
-                //if (deepcsvB>0.6324)   nbjet_ttbar_DeepCSV_MWP++; // Medium WP for 76X
-                //if (deepcsvB>0.8958)   nbjet_ttbar_DeepCSV_LWP++; // Loose WP for 76X
-                if (cmva_v2>0.875)  nbjet_ttbar_cMVAv2_TWP++; // Tight WP for 76X
-                if (cmva_v2>0.185)  nbjet_ttbar_cMVAv2_MWP++; // Medium WP for 76X
-                if (cmva_v2>-0.715) nbjet_ttbar_cMVAv2_LWP++; // Loose WP for 76X
+                if (csv_v2>0.9535  ) nbjet_ttbar_CSVv2_TWP++;   // Tight WP for  80X
+                if (csv_v2>0.8484  ) nbjet_ttbar_CSVv2_MWP++;   // Medium WP for 80X
+                if (csv_v2>0.5426  ) nbjet_ttbar_CSVv2_LWP++;   // Loose WP for  80X
+                if (deepcsvB>0.8001) nbjet_ttbar_DeepCSV_TWP++; // Tight WP for  94X
+                if (deepcsvB>0.4941) nbjet_ttbar_DeepCSV_MWP++; // Medium WP for 94X
+                if (deepcsvB>0.1522) nbjet_ttbar_DeepCSV_LWP++; // Loose WP for  94X
+                if (deepflavourBDisc >0.9068) nbjet_ttbar_DeepFlavourBDisc_TWP++; // Tight WP for  94X
+                if (deepflavourBDisc >0.4318) nbjet_ttbar_DeepFlavourBDisc_MWP++; // Medium WP for 94X
+                if (deepflavourBDisc >0.0574) nbjet_ttbar_DeepFlavourBDisc_LWP++; // Loose WP for  94X
+                if (cmva_v2> 0.9432) nbjet_ttbar_cMVAv2_TWP++;  // Tight WP for  80X
+                if (cmva_v2> 0.4432) nbjet_ttbar_cMVAv2_MWP++;  // Medium WP for 80X
+                if (cmva_v2>-0.5884) nbjet_ttbar_cMVAv2_LWP++;  // Loose WP for  80X
 
                 //if(output_name == "output_dy1") cout << "csvv2 = " << csv_v2 << "ptjet= " << ptjet << endl;
 
@@ -890,6 +918,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
 
                 if(isPU) FillHistoBtag("CSVv2pu",          flav, isPU ,csv_v2                                 , ww);
                 if(isPU) FillHistoBtag("DeepCSVbpu",       flav, isPU ,deepcsvB                               , ww);
+                if(isPU) FillHistoBtag("DeepFlavourBDiscpu",       flav, isPU ,deepflavourBDisc               , ww);
                 if(!produceCTagTree){
                     if (nSV > 0)FillHistoBtag("jet_pt_sv",      flav, isPU ,ptjet                                  , ww);
                 }
@@ -1171,6 +1200,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
                 FillHistoBtag("DeepCSVb", flav, isPU, deepcsvB      , ww);
                 FillHistoBtag("DeepCSVbb", flav, isPU, deepcsvBB      , ww);
                 FillHistoBtag("DeepCSVBDisc", flav, isPU, deepcsvB+deepcsvBB      , ww);
+                FillHistoBtag("DeepFlavourBDisc", flav, isPU, deepflavourBDisc      , ww);
                 FillHistoBtag("cMVAv2",flav, isPU, cmva_v2     , ww);
                 FillHistoBtag("CvsB",  flav, isPU, cvsB        , ww);
                 FillHistoBtag("CvsL",  flav, isPU, cvsL        , ww);
@@ -1374,6 +1404,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
                 FillHistoBtag("DeepCSVb", flav, isPU, deepcsvB , ww);
                 FillHistoBtag("DeepCSVbb", flav, isPU, deepcsvBB , ww);
                 FillHistoBtag("DeepCSVBDisc", flav, isPU, deepcsvB+deepcsvBB      , ww);
+                FillHistoBtag("DeepFlavourBDisc", flav, isPU, deepflavourBDisc      , ww);
                 FillHistoBtag("cMVAv2",flav, isPU, cmva_v2     , ww);
 
                 FillHistoBtag("CvsB",  flav, isPU, CvsB        ,ww);
@@ -1402,34 +1433,24 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TString output_name, TH1F* wgtcou
                 FillHistoTTbar("pt_jet",       ptjet_ttbar                             , ww);
 
                 // HIP check (as function of run range for Run2016B)
-                if( isData && thettbarselector_.theSelJetColl.size() == 2 )//ALPHA
+                if( isData )//ALPHA
                 {
-                    int cat=-1;
-                    // (as function of run range for Run2016B)
-                    //if( Run < 273450 )      cat=0;
-                    //else if( Run < 273730 ) cat=1;
-                    //else if( Run < 274240 ) cat=2;
-                    //else if( Run < 274284 ) cat=3;
-                    //else if( Run < 274335 ) cat=4;
-                    //else if( Run < 274382 ) cat=5;
-                    //else if( Run < 274421 ) cat=6;
-                    //else if( Run < 274440 ) cat=7;
-                    //else if( Run < 274968 ) cat=8;
-                    //else if( Run < 274970 ) cat=9;
-                    //else if( Run < 275000 ) cat=10;
-                    //else if( Run < 275068 ) cat=11;
-                    //else if( Run < 275124 ) cat=12;
-                    //else if( Run < 275292 ) cat=13;
-                    //else if( Run < 275311 ) cat=14;
-                    //else if( Run < 275345 ) cat=15;
-                    //else if( Run < 275376 ) cat=16;
-                    //else if( Run < 275657 ) cat=17;
-                    //else                    cat=18; // fill events for later run ranges
-
-                    FillHistoTTbar("nEvt_run", TString::Format("%d",Run).Data(), 1);
-                    if ( nbjet_ttbar_CSVv2_LWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2L", TString::Format("%d",Run).Data(), 1);
-                    if ( nbjet_ttbar_CSVv2_MWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2M", TString::Format("%d",Run).Data(), 1);
-                    if ( nbjet_ttbar_CSVv2_TWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2T", TString::Format("%d",Run).Data(), 1);
+                    int nJet = thettbarselector_.theSelJetColl.size();
+                    switch ( nJet ){
+                        case 2:
+                            if ( nbjet_ttbar_CSVv2_LWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2L", TString::Format("%d",Run).Data(), 1);
+                            if ( nbjet_ttbar_CSVv2_MWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2M", TString::Format("%d",Run).Data(), 1);
+                            if ( nbjet_ttbar_CSVv2_TWP >= 2 ) FillHistoTTbar("nEvt_run_CSVv2T", TString::Format("%d",Run).Data(), 1);
+                            break;
+                    }
+                    if ( nJet >= 2 ){
+                        FillHistoTTbar("nEvt_run", TString::Format("%d",Run).Data(), 1);
+                        if (nJet <= 9){
+                            FillHistoTTbar(TString::Format("nEvt_run_%dJet",nJet).Data(),   TString::Format("%d",Run).Data(), 1);
+                        }else{
+                            FillHistoTTbar("nEvt_run_MoreJet",TString::Format("%d",Run).Data(), 1);
+                        }
+                    }
                 }
             }
 
