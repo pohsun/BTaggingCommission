@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, shutil, string, re, copy
+import sys, os, shutil, string, re, copy, imp
 import argparse
 from subprocess import Popen, PIPE, call
 import fnmatch
@@ -46,11 +46,8 @@ def writeJobScript(ifname,ofname,ifPathType='eos'):
 def compileMacros(args):
     os.chdir(rootDir)
     if args.compile or not os.path.exists("CommPlotProducer4ttbar_C.so"):
-        shutil.copy(os.path.join(scriptDir,"TTbarSelector.h"), os.path.join(rootDir,".."))
-        shutil.copy(os.path.join(scriptDir,"TTbarSelector.C"), os.path.join(rootDir,".."))
         shutil.copy(os.path.join(scriptDir,"CommPlotProducer4ttbar.h"), os.path.join(rootDir))
         shutil.copy(os.path.join(scriptDir,"CommPlotProducer4ttbar.C"), os.path.join(rootDir))
-        gROOT.ProcessLine(".L ../TTbarSelector.C++")
         gROOT.ProcessLine(".L CommPlotProducer4ttbar.C++g")
     os.chdir(CWD)
     pass
@@ -96,9 +93,9 @@ python {0} run CFG --pu "PUWGT"
     handle.close()
 
     # create list of input files
-    scriptDir = os.path.join(rootDir, "batch")
-    if not os.path.isdir(scriptDir):
-        os.makedirs(scriptDir)
+    batchDir = os.path.join(rootDir, "batch")
+    if not os.path.isdir(batchDir):
+        os.makedirs(batchDir)
     for datasetName, data in dataset.iteritems():
         # if datasetName not in ['runE_v1','runF_v1']:
         #     continue
@@ -114,21 +111,21 @@ python {0} run CFG --pu "PUWGT"
         # Split jobs
         for iPart in range(0,(len(iFileList)-1)/batchSize+1):
             oFileListName = "flist_{0}_part{1:02d}.py".format(datasetName,iPart);
-            with open(os.path.join(scriptDir,oFileListName),'w+') as oFileList:
+            with open(os.path.join(batchDir,oFileListName),'w+') as oFileList:
                 oFileList.write("dataset = '{0}_part{1:02d}'\n".format(datasetName,iPart))
                 oFileList.write("isData  = {0}\n".format("True" if data['xsec'] == -1 else "False"))
                 oFileList.write("inputFiles = [\n")
                 for iFile in iFileList[iPart*batchSize:batchSize+iPart*batchSize]:
                     oFileList.write("    '"+iFile+"',\n")
                 oFileList.write("]\n")
-            os.chmod(os.path.join(scriptDir,oFileListName),0644)
+            os.chmod(os.path.join(batchDir,oFileListName),0644)
 
             batchScript = re.sub('QUEUE'        , args.queue                                    , batchTemplate)
             batchScript = re.sub('WORKDIR'      , rootDir                                       , batchScript)
             batchScript = re.sub('JOBNAME'      , "{0}_p{1:02d}".format(datasetName,iPart)      , batchScript)
-            batchScript = re.sub("CFG"          , os.path.join(scriptDir,oFileListName)         , batchScript)
+            batchScript = re.sub("CFG"          , os.path.join(batchDir,oFileListName)          , batchScript)
             batchScript = re.sub("PUWGT"        , puWgtUrl                                      , batchScript)
-            oBatchScriptName=os.path.join(scriptDir,"batchJob_{0}_part{1:02d}.sh".format(datasetName,iPart))
+            oBatchScriptName=os.path.join(batchDir,"batchJob_{0}_part{1:02d}.sh".format(datasetName,iPart))
             with open(oBatchScriptName,'w+') as batchScriptFile:
                 batchScriptFile.write(batchScript)
             os.chmod(oBatchScriptName,0755)
@@ -143,15 +140,13 @@ def runJob(args):
 
     # Start processing
     os.chdir(rootDir)
-    gROOT.ProcessLine(".L ../TTbarSelector.C+")
-    gROOT.ProcessLine(".L CommPlotProducer4ttbar.C+")
-    os.chdir(CWD)
+    if args.compile or not os.path.exists("CommPlotProducer4ttbar_C.so"):
+        compileMacros(args)
+    else:
+        gROOT.ProcessLine(".L CommPlotProducer4ttbar_C.so")
     from ROOT import CommPlotProducer4ttbar
 
-    PtMin_Cut = 30  # Not really used in CommPlotProducer4ttbar
-    PtMax_Cut = 500
-    syst = ""
-
+    os.chdir(CWD)
     tree = TChain("btagana/ttree")
     inputWeight = 0 if isData else TH1F("wgtcounter","",1,0,1)
     for iFile in inputFiles:
@@ -162,8 +157,25 @@ def runJob(args):
             f.Close()
         tree.Add(iFile)
     url = args.puWgtUrl if os.path.expandvars(args.puWgtUrl).startswith('/') else os.path.join(CWD,args.puWgtUrl)
-    run = CommPlotProducer4ttbar(tree,True,True,False,url)
-    run.Loop(isData, "output_{0}".format(dataset), inputWeight, syst)
+    run = CommPlotProducer4ttbar(tree,url,"output_{0}.root".format(dataset))
+
+    # Load trigger config
+    ttbarConfig = imp.load_source("ttbarConfig",os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/python/TTbarSelectionProducer_cfi.py"))
+    for chan in ttbarConfig.ttbarselectionproducer.trigChannels:
+        run.AddTrigChannel(chan)
+
+    # Load cut, tagger WPs
+    runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py"))
+    for wpName, wp in runJobConfig.tagWPs.iteritems():
+        run.AddTagWP(wpName, wp['varName'], wp['wp'])
+        run.RegBranch(wp['varName']) # maxJets=2000
+    for cutName, cut, in runJobConfig.subCuts.iteritems():
+        run.AddSubEventList(cutName, cut['cutStr'])
+        for var in cut['cutVar']:
+            run.RegBranch(var)
+
+    # Loop over
+    run.Loop(isData, inputWeight)
     pass
 
 def hadd(iDir, oDir, datasetName):
@@ -197,7 +209,7 @@ def merge(args):
 
     output_root_file = TFile( os.path.join(output_dir,filename), 'RECREATE' )
 
-    # write histograms
+    # put all histograms together and insert event-independent weight
     for groupKey, groupVal in groupdata.iteritems():
         groupVal['xsec'] = [ (lambda x, idx: x if x > 0 else dataset[groupVal['dataset'][idx]]['xsec'])(x,idx) for idx, x in enumerate(groupVal['xsec']) ]
         print groupKey, groupVal
@@ -212,11 +224,16 @@ def merge(args):
 
             # open input ROOT file
             root_file = TFile(input_root_file)
-            htemp = root_file.Get("TotalGenEvts")
-            htemp.Print()
-            nEventsAll = htemp.GetBinContent(1)
-            scale = float(groupVal['xsec'][datasetIdx]*groupVal['lumi'])/nEventsAll if groupVal['xsec'][datasetIdx] > 0 else 1.
-            print "{0:10} -- Events: {1:.3f} (all); xsec: {2:.3E}; scale: {3:.3E}".format(datasetKey, nEventsAll, dataset[datasetKey]['xsec'], scale)
+            hTotalGenEvts = root_file.Get("totalGenEvts")
+            nEventsAll = hTotalGenEvts.GetBinContent(1)
+            lumiScale = float(groupVal['xsec'][datasetIdx]*groupVal['lumi'])/nEventsAll if groupVal['xsec'][datasetIdx] > 0 else 1.
+            hPuWgtNorms = root_file.Get("puWgtNorms")
+            puWgtNormScale={}
+            for iBin in range(1, hPuWgtNorms.GetNbinsX()+1, 2):
+                sf   = hPuWgtNorms.GetBinContent(iBin) / hPuWgtNorms.GetBinContent(iBin+1) if groupVal['xsec'][datasetIdx] > 0 else 1.
+                name = "_{0}".format(hPuWgtNorms.GetXaxis().GetBinLabel(iBin).split("_")[-1])
+                puWgtNormScale[name]=sf
+            print "{0:10} -- Events: {1:.3f} (all); xsec: {2:.3E}; scale: {3:.3E}".format(datasetKey, nEventsAll, dataset[datasetKey]['xsec'], lumiScale*puWgtNormScale['_nominal'])
 
             # get the number of histograms
             nHistos = root_file.GetListOfKeys().GetEntries()
@@ -226,6 +243,10 @@ def merge(args):
                 histoName = root_file.GetListOfKeys()[h].GetName()
                 htemp = root_file.Get(histoName)
                 if htemp.InheritsFrom('TH1') or htemp.InheritsFrom('TH2'):
+                    scale = lumiScale
+                    for k,v in puWgtNormScale.iteritems():
+                        if k in htemp.GetName():
+                            scale *= v
                     if histoName not in final_histos.keys():
                         final_histos[histoName] = copy.deepcopy(htemp)
                         final_histos[histoName].SetName(histoName + '_' + groupKey)
@@ -243,7 +264,6 @@ def merge(args):
 
     output_root_file.Close()
     pass
-
 def drawAll(args):
     gROOT.ProcessLine(".L DrawCommPlot4ttbar.C+")
     from ROOT import Draw, DrawTTbar
@@ -260,68 +280,81 @@ def drawAll(args):
     # Draw("DeepCSVb"                  , "DeepCSV discriminator"              , 1)
     # Draw("CSV"                       , "CSVv2(AVR) discriminator"           , 1)
     # Draw("JBP"                       , "JBP discriminator"                  , 1)
-    # Draw("SoftMu"                    , "SM discriminator"                   , 1)
-    # Draw("SoftEl"                    , "SE discriminator"                   , 1)
     # Draw("cMVAv2"                    , "cMVAv2 discriminator"               , 1)
 
     # DrawTTbar("nbtag_all_afterJetSel_CSVv2M_SFapplied"                                                      , "number of b-tagged jets (CSVv2M)" , 0)
     # DrawTTbar("nbtag_all_afterJetSel_CSVv2M"      ttbar/Commissioning_plots/nbtag_all_afterJetSel_CSVv2M.cc , "number of b-tagged jets (CSVv2M)" , 0)
 
     ### In AN-16-036:
-    Draw("jet_pt_all"                    , "Jet pT"                                             , 1)
-    Draw("jet_eta"                       , "Jet eta"                                            , 0)
-    Draw("trk_multi_sel"                 , "Number of selected tracks in the jets"              , 0)
-    Draw("track_pt"                      , "Track p_{T}"                                        , 1)
-    Draw("track_nHit"                    , "number of hits"                                     , 0)
-    Draw("track_HPix"                    , "Number of hits in the Pixel"                        , 0)
-    Draw("track_chi2"                    , "Normalized #chi^{2} of tracks"                      , 1)
-    Draw("track_dist"                    , "Track distance to the jet axis"                     , 1)
-    Draw("track_len"                     , "Track decay length"                                 , 1)
-    Draw("track_IP"                      , "3D IP of tracks"                                    , 1)
-    Draw("track_IPs"                     , "3D IP significance of tracks"                       , 1)
-    Draw("track_IPs"                     , "3D IP significance of tracks"                       , 0)
-    Draw("sv_multi_0"                    , "nr. of SV including bin 0"                          , 1)
-    Draw("sv_flight3DSig"                , "SV 3D flight distance significance"                 , 1)
-    Draw("sv_deltaR_jet"                 , "Delta R between the jet and the SV direction."      , 0)
-    Draw("sv_phi"                        , "#phi"                                               , 0)
-    Draw("sv_eta"                        , "#eta"                                               , 0)
-    Draw("tagvarCSV_vertexmass_cat0"     , "massVertexEnergyFraction [GeV]"                     , 0)
-    Draw("tagvarCSV_vertexmass3trk_cat0" , "massVertexEnergyFraction (at least 3 tracks) [GeV]" , 0)
-    Draw("tagvarCSV_vertexCategory"      , "Vertex Category"                                    , 1)
-    Draw("pfmuon_multi"                  , "number of pf muons"                                 , 1)
-    Draw("pfmuon_pt"                     , "p_{T} of pf muons [GeV]"                            , 1)
-    Draw("pfmuon_ptrel"                  , "p_{T} rel. of pf muons [GeV]"                       , 0)
-    Draw("JP"                            , "JP discriminator"                                   , 1)
-    Draw("JBP"                           , "JBP discriminator"                                  , 1)
-    Draw("CSVv2"                         , "CSVv2 discriminator"                                , 1)
-    Draw("DeepCSVb"                      , "DeepCSVb discriminator"                             , 1)
-    Draw("DeepCSVbb"                     , "DeepCSVbb discriminator"                            , 1)
-    Draw("DeepCSVBDisc"                  , "DeepCSV discriminator"                              , 1)
-    Draw("DeepFlavourBDisc"              , "DeepFlavour b discriminator"                        , 1)
-    Draw("cMVAv2"                        , "cMVAv2 discriminator"                               , 1)
-    Draw("CSV"                           , "CSVv2(AVR) discriminator"                           , 1)
-    Draw("CvsB"                          , "C-tag CvsB discriminator"                           , 1)
-    Draw("CvsL"                          , "C-tag CvsL discriminator"                           , 1)
-    Draw("SoftEl"                        , "SE discriminator"                                   , 1)
-    Draw("SoftMu"                        , "SM discriminator"                                   , 1)
-    Draw("TCHP"                          , "TCHP discriminator"                                 , 1)
-    Draw("discri_ssche0"                 , "SSVHE discriminator"                                , 1)
 
-    DrawTTbar("njet_pt30"                     , "number of jes"                     , 1)
-    DrawTTbar("nPV"                           , "number of PV"                      , 0)
+    DrawTTbar("nPV"                           , "Number of PV"                      , 0)
     DrawTTbar("met"                           , "MET [GeV]"                         , 0)
     DrawTTbar("mll"                           , "M_{ll} [GeV]"                      , 0)
     DrawTTbar("njet"                          , "number of jets"                    , 0)
-    #DrawTTbar("nbtag"                        , "number of btag jets"               , 0)
-    DrawTTbar("pt_e"                          , "Leading electron P_{T} [GeV]"      , 0)
-    DrawTTbar("pt_mu"                         , "Leading muon P_{T} [GeV]"          , 0)
-    DrawTTbar("pt_jet"                        , "Leading jet P_{T} [GeV]"           , 0)
-    DrawTTbar("nbtag_all_afterJetSel_CSVv2L"  , "number of b-tagged jets [CSVv2L]"  , 1)
-    DrawTTbar("nbtag_all_afterJetSel_CSVv2M"  , "number of b-tagged jets [CSVv2M]"  , 1)
-    DrawTTbar("nbtag_all_afterJetSel_CSVv2T"  , "number of b-tagged jets [CSVv2T]"  , 1)
-    DrawTTbar("nbtag_all_afterJetSel_cMVAv2L" , "number of b-tagged jets [cMVAv2L]" , 1)
-    DrawTTbar("nbtag_all_afterJetSel_cMVAv2M" , "number of b-tagged jets [cMVAv2M]" , 1)
-    DrawTTbar("nbtag_all_afterJetSel_cMVAv2T" , "number of b-tagged jets [cMVAv2T]" , 1)
+    DrawTTbar("njet_pt30"                     , "number of jes"                     , 1)
+    DrawTTbar("lep0_pt"                       , "Leading lepton p_{T} [GeV]"        , 0)
+    DrawTTbar("lep1_pt"                       , "Sub-leading lepton p_{T} [GeV]"    , 0)
+    DrawTTbar("jet0_pt"                       , "Leading jet p_{T} [GeV]"           , 0)
+    DrawTTbar("nBtag_all_afterJetSel_CSVv2L"  , "number of b-tagged jets [CSVv2L]"  , 1)
+    DrawTTbar("nBtag_all_afterJetSel_CSVv2M"  , "number of b-tagged jets [CSVv2M]"  , 1)
+    DrawTTbar("nBtag_all_afterJetSel_CSVv2T"  , "number of b-tagged jets [CSVv2T]"  , 1)
+
+    Draw("jet_pt"           , "Jet pT"                                        , 1)
+    Draw("jet_eta"          , "Jet eta"                                       , 0)
+
+    Draw("sv_multi_0"       , "Number of SV"                                  , 1)
+    Draw("sv_flight3DSig"   , "SV 3D flight distance significance"            , 1)
+    Draw("sv_deltaR_jet"    , "Delta R between the jet and the SV direction." , 0)
+    Draw("sv_eta"           , "#eta"                                          , 0)
+    Draw("sv_phi"           , "#phi"                                          , 0)
+
+    Draw("trk_multi_sel"    , "Number of selected tracks in the jets"         , 0)
+    Draw("track_pt"         , "Track p_{T}"                                   , 1)
+    Draw("track_nHit"       , "Number of hits"                                , 0)
+    Draw("track_HPix"       , "Number of pixel hits"                          , 0)
+    Draw("track_chi2"       , "Normalized #chi^{2} of tracks"                 , 1)
+    Draw("track_dist"       , "Track distance to the jet axis"                , 1)
+    Draw("track_len"        , "Track decay length"                            , 1)
+    Draw("track_IP"         , "3D IP of tracks"                               , 1)
+    Draw("track_IPs"        , "3D IP significance of tracks"                  , 1)
+    Draw("track_IPs"        , "3D IP significance of tracks"                  , 0)
+
+    Draw("pfmuon_multi"     , "Number of pf muons"               , 1)
+    Draw("pfmuon_pt"        , "p_{T} of pf muons [GeV]"          , 1)
+    Draw("pfmuon_eta"       , "#eta of pf muons"                 , 1)
+    Draw("pfmuon_phi"       , "#phi of pf muons"                 , 1)
+    Draw("pfmuon_ptrel"     , "p_{T} rel. of pf muons [GeV]"     , 0)
+    Draw("pfelectron_multi" , "Number of pf electrons"           , 1)
+    Draw("pfelectron_pt"    , "p_{T} of pf electrons [GeV]"      , 1)
+    Draw("pfelectron_eta"   , "#eta of pf electrons"             , 1)
+    Draw("pfelectron_phi"   , "#phi of pf electrons"             , 1)
+    Draw("pfelectron_ptrel" , "p_{T} rel. of pf electrons [GeV]" , 0)
+
+    Draw("JP"               , "JP discriminator"                              , 1)
+    Draw("JBP"              , "JBP discriminator"                             , 1)
+    Draw("CSVv2"            , "CSVv2 discriminator"                           , 1)
+    Draw("DeepCSVb"         , "DeepCSVb discriminator"                        , 1)
+    Draw("DeepCSVbb"        , "DeepCSVbb discriminator"                       , 1)
+    Draw("DeepCSVBDisc"     , "DeepCSV b discriminator"                       , 2)
+    Draw("DeepFlavourBDisc" , "DeepFlavour b discriminator"                   , 1)
+    Draw("cMVAv2"           , "cMVAv2 discriminator"                          , 1)
+    Draw("CSV"              , "CSVv2(AVR) discriminator"                      , 1)
+    Draw("CvsB"             , "C-tag CvsB discriminator"                      , 1)
+    Draw("CvsL"             , "C-tag CvsL discriminator"                      , 1)
+    Draw("TCHP"             , "TCHP discriminator"                            , 1)
+    pass
+
+def drawAll2(args):
+    drawer = imp.load_source("drawer", os.path.join(scriptDir, "drawAll.py"))
+    os.chdir(rootDir)
+    if not os.path.exists("ttbar/Commissioning_plots"):
+        os.makedirs("ttbar/Commissioning_plots")
+
+    for pName, cfg in drawer.cfi.plots.iteritems():
+        print cfg
+        drawer.draw(cfg, isLog=True)
+        drawer.draw(cfg, isLog=False)
+
     pass
 
 if __name__ == "__main__":
@@ -353,6 +386,9 @@ if __name__ == "__main__":
     subparserRun.add_argument("--pu", dest="puWgtUrl",
         default="${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/ttbar/data/pileupWgts.root",
         help="Pathname to the output of runPUEstimation.py")
+    subparserRun.add_argument("-o", "--output", dest="outputName",
+        help="Output filename",
+        default='output.root')
 
     subparserMerge = subparsers.add_parser('merge')
     subparserMerge.set_defaults(func=merge)
@@ -366,7 +402,7 @@ if __name__ == "__main__":
         default='output_all')
 
     subparserDraw = subparsers.add_parser('draw')
-    subparserDraw.set_defaults(func=drawAll)
+    subparserDraw.set_defaults(func=drawAll2)
 
     args = parser.parse_args()
     args.func(args)
