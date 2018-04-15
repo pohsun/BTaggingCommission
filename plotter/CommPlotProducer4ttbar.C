@@ -159,7 +159,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
             if (jet_pt > jet0_pt) jet0_pt=jet_pt;
 
             // Fill info for ttbar 
-            for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){//{{{// Fill Jet info
+            for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){
                 if (!v_evtList[iterEvL->second]->Contains(jentry)) continue;
                 for (std::map<std::string, int>::iterator iterTagWP=m_tagWP.begin(); iterTagWP != m_tagWP.end(); iterTagWP++){
                     int tagIdx = iterTagWP->second;
@@ -716,7 +716,7 @@ bool CommPlotProducer4ttbar::passTrigSel(int chan)
     bool isTriggered = false;
     int triggerWord = round(GetBranch("ttbar_trigWord",0));
     for(unsigned int iCh=0; iCh<trigChannels.size(); iCh++){
-        if (trigChannels[iCh] != chan) continue;
+        if (abs(trigChannels[iCh]) != abs(chan)) continue;
         isTriggered |= ((triggerWord>>iCh) & 1);
     }
     return isTriggered;

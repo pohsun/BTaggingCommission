@@ -4,11 +4,12 @@
 import os,imp
 from ROOT import TFile
 from ROOT import TCanvas, TLegend, TLatex
+from ROOT import TAxis
 from ROOT import TH1D, THStack, TRatioPlot
 
 cfi = imp.load_source("cfi","drawAll_cfi.py")
 TH1D.SetDefaultSumw2(True)
-canvas  = TCanvas("c1", "", 1000, 600)
+canvas  = TCanvas("c1", "", 800, 600)
 latex   = TLatex()
 
 def setDefaultLegend(leg):
@@ -17,7 +18,8 @@ def setDefaultLegend(leg):
     leg.SetLineColor(1);
     leg.SetLineStyle(1);
     leg.SetLineWidth(1);
-    leg.SetFillStyle(1001);
+    # leg.SetFillStyle(1001);
+    leg.SetFillStyle(0);# Transparent
     leg.SetBorderSize(0);
     leg.SetFillColor(0);
     return leg
@@ -25,40 +27,41 @@ def setDefaultLegend(leg):
 def SetDefaultHist(hist):
     return hist
 
-def drawLatexCMS(x=0.20, y=0.89):
+def drawLatexCMS(x=0.10, y=0.94):
     latex.SetTextSize(0.065);
     latex.SetTextFont(62);
-    latex.SetTextAlign(13);
+    latex.SetTextAlign(11);#RB
     latex.SetLineWidth(2);
     latex.DrawLatexNDC(x, y, "CMS")
 
-    latex.SetTextSize(0.057);
-    latex.SetTextFont (52);
-    latex.SetTextAlign(13);
-    latex.SetLineWidth(2);
-    latex.DrawLatexNDC(x, y-0.07, "Preliminary");
+    if (cfi.isPrelim):
+        latex.SetTextSize(0.055);
+        latex.SetTextFont (52);
+        latex.SetTextAlign(11);#LB
+        latex.SetLineWidth(2);
+        latex.DrawLatexNDC(x+0.1, y, "Preliminary");
     pass
 
-def drawLatexLumi(x=0.98,y=0.95125, lumi=41.86):
-    latex.SetTextSize(0.049);
+def drawLatexLumi(x=0.89,y=0.89):
+    latex.SetTextSize(0.05);
     latex.SetTextFont (42);
-    latex.SetTextAlign(31);
+    latex.SetTextAlign(33);#RU
     latex.SetLineWidth(2);
-    latex.DrawLatexNDC(x, y, "{0} fb^{{-1}}".format(lumi));
+    latex.DrawLatexNDC(x, y, "{0} fb^{{-1}}".format(cfi.lumi));
     pass
 
-def drawLatexSel(x=0.20, y=0.82, sel="e#mu channel #geq 2 jets"):
-    latex.SetTextSize(0.080);
+def drawLatexSel(x=0.50, y=0.89, sel="e#mu channel #geq 2 jets"):
+    latex.SetTextSize(0.04);
     latex.SetTextFont (42);
-    latex.SetTextAlign(13);
+    latex.SetTextAlign(21);#CB
     latex.SetLineWidth(2);
     latex.DrawLatexNDC(x, y, sel);
     pass
 
-def drawLatexJetType(x=0.20, y=0.74):
-    latex.SetTextSize(0.055);
+def drawLatexJetType(x=0.50, y=0.85):
+    latex.SetTextSize(0.04);
     latex.SetTextFont (42);
-    latex.SetTextAlign(31);
+    latex.SetTextAlign(21);#CB
     latex.SetLineWidth(2);
     latex.DrawLatexNDC(x, y, "p_{T} #geq 20 GeV");
     pass
@@ -75,8 +78,8 @@ def draw(cfg, isLog=False):
     for hIdx, hist in enumerate(hists):
         isData = cfg['isData'][hIdx]
 
-        hist.SetXTitle(cfg['xTitle'])
-        hist.SetYTitle(cfg['yTitle'])
+        hist.GetXaxis().SetTitle(cfg['xTitle'])
+        hist.GetYaxis().SetTitle(cfg['yTitle'])
         if isData:
             hist.SetMarkerStyle(cfg['fillColor'][hIdx])
             hist.SetMarkerSize(0.75)
@@ -100,21 +103,22 @@ def draw(cfg, isLog=False):
 
     # Latex labels
     hStack.Draw(cfg['stackOpt'])
+    hStack.GetXaxis().SetTitle(cfg['xTitle'])
+    hStack.GetYaxis().SetTitle(cfg['yTitle'])
     histTotal[1].Draw("SAME "+cfg['drawOpt'][0])
     stLeg.Draw()
-    drawLatexCMS()
-    drawLatexLumi()
-    drawLatexJetType()
-    drawLatexSel()
+    drawLatexCMS    ()
+    drawLatexLumi   (x=0.89,y=0.89)
+    drawLatexJetType(x=0.50,y=0.86)
+    drawLatexSel    (x=0.50,y=0.81)
 
     # Print files
     for oFormat in cfi.outputFormats:
         canvas.Update()
-        canvas.Print(os.path.join(cfi.outputDir,"hstack_{0}.{1}".format(cfg['name'],oFormat)))
+        canvas.Print(os.path.join(cfi.outputDir,"hstack_{0}{1}.{2}".format(cfg['name'],"_log" if isLog else "",oFormat)))
 
     # Ratio
     hRatio = [ TRatioPlot(hStack, histTotal[1],opt) for opt in cfg['ratioOpts'] ]
-
     rpLeg  = TLegend(stLeg)
     rpLeg.SetX1NDC(cfg['rpLegPos'][0]);
     rpLeg.SetY1NDC(cfg['rpLegPos'][1]);
@@ -123,14 +127,16 @@ def draw(cfg, isLog=False):
 
     for rpIdx, rp in enumerate(hRatio):
         rp.Draw("")
+        rp.GetXaxis().SetTitle(cfg['xTitle'])
+        rp.GetUpperRefYaxis().SetTitle(cfg['yTitle'])
+        rp.GetLowerRefYaxis().SetTitle("Ratio")
         histTotal[1].Draw("SAME "+cfg['drawOpt'][0])
         rpLeg.Draw()
-        drawLatexCMS()
-        drawLatexLumi()
-        drawLatexJetType()
-        drawLatexSel()
+        drawLatexCMS    ()
+        drawLatexLumi   (x=0.88,y=0.92)
+        drawLatexJetType(x=0.50,y=0.89)
+        drawLatexSel    (x=0.50,y=0.84)
         for oFormat in cfi.outputFormats:
             canvas.Update()
-            canvas.Print(os.path.join(cfi.outputDir,"hratio_{0}_{1}.{2}".format(cfg['ratioOpts'][rpIdx],cfg['name'],oFormat)))
-
+            canvas.Print(os.path.join(cfi.outputDir,"hratio_{0}_{1}{2}.{3}".format(cfg['ratioOpts'][rpIdx],cfg['name'],"_log" if isLog else "",oFormat)))
     pass

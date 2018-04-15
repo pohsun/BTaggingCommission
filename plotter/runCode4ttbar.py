@@ -161,8 +161,11 @@ def runJob(args):
 
     # Load trigger config
     ttbarConfig = imp.load_source("ttbarConfig",os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/python/TTbarSelectionProducer_cfi.py"))
-    for chan in ttbarConfig.ttbarselectionproducer.trigChannels:
-        run.AddTrigChannel(chan)
+    for chanIdx, chan in enumerate(ttbarConfig.ttbarselectionproducer.trigChannels):
+        if chanIdx not in []: # Skip prescaled and non-emu trigger bits
+            run.AddTrigChannel(chan)
+        else:
+            run.AddTrigChannel(0)
 
     # Load cut, tagger WPs
     runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py"))
@@ -264,87 +267,8 @@ def merge(args):
 
     output_root_file.Close()
     pass
+
 def drawAll(args):
-    gROOT.ProcessLine(".L DrawCommPlot4ttbar.C+")
-    from ROOT import Draw, DrawTTbar
-    os.chdir(rootDir)
-    if not os.path.exists("ttbar/Commissioning_plots"):
-        os.makedirs("ttbar/Commissioning_plots")
-
-    ### In BTV-15-001:
-    # Draw("track_IPs"                 , "3D IP significance of tracks"       , 1)
-    # Draw("sv_flight3DSig"            , "SV 3D flight distance significance" , 1)
-    # Draw("tagvarCSV_vertexmass_cat0" , "SV mass [GeV]"                      , 0)
-    # Draw("JP"                        , "JP discriminator"                   , 1)
-    # Draw("CSVv2"                     , "CSVv2 discriminator"                , 1)
-    # Draw("DeepCSVb"                  , "DeepCSV discriminator"              , 1)
-    # Draw("CSV"                       , "CSVv2(AVR) discriminator"           , 1)
-    # Draw("JBP"                       , "JBP discriminator"                  , 1)
-    # Draw("cMVAv2"                    , "cMVAv2 discriminator"               , 1)
-
-    # DrawTTbar("nbtag_all_afterJetSel_CSVv2M_SFapplied"                                                      , "number of b-tagged jets (CSVv2M)" , 0)
-    # DrawTTbar("nbtag_all_afterJetSel_CSVv2M"      ttbar/Commissioning_plots/nbtag_all_afterJetSel_CSVv2M.cc , "number of b-tagged jets (CSVv2M)" , 0)
-
-    ### In AN-16-036:
-
-    DrawTTbar("nPV"                           , "Number of PV"                      , 0)
-    DrawTTbar("met"                           , "MET [GeV]"                         , 0)
-    DrawTTbar("mll"                           , "M_{ll} [GeV]"                      , 0)
-    DrawTTbar("njet"                          , "number of jets"                    , 0)
-    DrawTTbar("njet_pt30"                     , "number of jes"                     , 1)
-    DrawTTbar("lep0_pt"                       , "Leading lepton p_{T} [GeV]"        , 0)
-    DrawTTbar("lep1_pt"                       , "Sub-leading lepton p_{T} [GeV]"    , 0)
-    DrawTTbar("jet0_pt"                       , "Leading jet p_{T} [GeV]"           , 0)
-    DrawTTbar("nBtag_all_afterJetSel_CSVv2L"  , "number of b-tagged jets [CSVv2L]"  , 1)
-    DrawTTbar("nBtag_all_afterJetSel_CSVv2M"  , "number of b-tagged jets [CSVv2M]"  , 1)
-    DrawTTbar("nBtag_all_afterJetSel_CSVv2T"  , "number of b-tagged jets [CSVv2T]"  , 1)
-
-    Draw("jet_pt"           , "Jet pT"                                        , 1)
-    Draw("jet_eta"          , "Jet eta"                                       , 0)
-
-    Draw("sv_multi_0"       , "Number of SV"                                  , 1)
-    Draw("sv_flight3DSig"   , "SV 3D flight distance significance"            , 1)
-    Draw("sv_deltaR_jet"    , "Delta R between the jet and the SV direction." , 0)
-    Draw("sv_eta"           , "#eta"                                          , 0)
-    Draw("sv_phi"           , "#phi"                                          , 0)
-
-    Draw("trk_multi_sel"    , "Number of selected tracks in the jets"         , 0)
-    Draw("track_pt"         , "Track p_{T}"                                   , 1)
-    Draw("track_nHit"       , "Number of hits"                                , 0)
-    Draw("track_HPix"       , "Number of pixel hits"                          , 0)
-    Draw("track_chi2"       , "Normalized #chi^{2} of tracks"                 , 1)
-    Draw("track_dist"       , "Track distance to the jet axis"                , 1)
-    Draw("track_len"        , "Track decay length"                            , 1)
-    Draw("track_IP"         , "3D IP of tracks"                               , 1)
-    Draw("track_IPs"        , "3D IP significance of tracks"                  , 1)
-    Draw("track_IPs"        , "3D IP significance of tracks"                  , 0)
-
-    Draw("pfmuon_multi"     , "Number of pf muons"               , 1)
-    Draw("pfmuon_pt"        , "p_{T} of pf muons [GeV]"          , 1)
-    Draw("pfmuon_eta"       , "#eta of pf muons"                 , 1)
-    Draw("pfmuon_phi"       , "#phi of pf muons"                 , 1)
-    Draw("pfmuon_ptrel"     , "p_{T} rel. of pf muons [GeV]"     , 0)
-    Draw("pfelectron_multi" , "Number of pf electrons"           , 1)
-    Draw("pfelectron_pt"    , "p_{T} of pf electrons [GeV]"      , 1)
-    Draw("pfelectron_eta"   , "#eta of pf electrons"             , 1)
-    Draw("pfelectron_phi"   , "#phi of pf electrons"             , 1)
-    Draw("pfelectron_ptrel" , "p_{T} rel. of pf electrons [GeV]" , 0)
-
-    Draw("JP"               , "JP discriminator"                              , 1)
-    Draw("JBP"              , "JBP discriminator"                             , 1)
-    Draw("CSVv2"            , "CSVv2 discriminator"                           , 1)
-    Draw("DeepCSVb"         , "DeepCSVb discriminator"                        , 1)
-    Draw("DeepCSVbb"        , "DeepCSVbb discriminator"                       , 1)
-    Draw("DeepCSVBDisc"     , "DeepCSV b discriminator"                       , 2)
-    Draw("DeepFlavourBDisc" , "DeepFlavour b discriminator"                   , 1)
-    Draw("cMVAv2"           , "cMVAv2 discriminator"                          , 1)
-    Draw("CSV"              , "CSVv2(AVR) discriminator"                      , 1)
-    Draw("CvsB"             , "C-tag CvsB discriminator"                      , 1)
-    Draw("CvsL"             , "C-tag CvsL discriminator"                      , 1)
-    Draw("TCHP"             , "TCHP discriminator"                            , 1)
-    pass
-
-def drawAll2(args):
     drawer = imp.load_source("drawer", os.path.join(scriptDir, "drawAll.py"))
     os.chdir(rootDir)
     if not os.path.exists("ttbar/Commissioning_plots"):
@@ -352,8 +276,8 @@ def drawAll2(args):
 
     for pName, cfg in drawer.cfi.plots.iteritems():
         print cfg
-        drawer.draw(cfg, isLog=True)
         drawer.draw(cfg, isLog=False)
+        drawer.draw(cfg, isLog=True)
 
     pass
 
@@ -402,7 +326,7 @@ if __name__ == "__main__":
         default='output_all')
 
     subparserDraw = subparsers.add_parser('draw')
-    subparserDraw.set_defaults(func=drawAll2)
+    subparserDraw.set_defaults(func=drawAll)
 
     args = parser.parse_args()
     args.func(args)
