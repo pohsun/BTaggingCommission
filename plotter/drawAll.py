@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# vim:set sts=4 sw=4 fdm=syntax fdl=1 et:
+# vim:set sts=4 sw=4 fdm=syntax foldlevel=1 et:
 
 import os,imp
 from ROOT import TFile
@@ -258,6 +258,8 @@ def draw(cfg, isLog=False):
     drawLatexLumi   (x=0.89,y=0.89)
     drawLatexJetType(x=0.50,y=0.86)
     drawLatexSel    (x=0.50,y=0.81)
+    if "stExtra" in cfg.keys():
+        exec cfg['stExtra']
 
     # Print files
     for oFormat in cfi.outputFormats:
@@ -283,6 +285,8 @@ def draw(cfg, isLog=False):
         drawLatexLumi   (x=0.88,y=0.92)
         drawLatexJetType(x=0.50,y=0.89)
         drawLatexSel    (x=0.50,y=0.84)
+        if "rpExtra" in cfg.keys():
+            exec cfg['rpExtra']
         for oFormat in cfi.outputFormats:
             canvas.Update()
             canvas.Print(os.path.join(cfi.outputDir,"hratio_{0}_{1}{2}.{3}".format(cfg['ratioOpts'][rpIdx],cfg['name'],"_log" if isLog else "",oFormat)))
