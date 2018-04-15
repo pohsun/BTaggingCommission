@@ -125,7 +125,7 @@ for p in btagPlots:
     plots[p]['xTitle'] = " ".join(p.split("_")[:-1])
 
 # Plot specified settings
-plots["nPV_"                                       ]['xTitle'] = "Number of PVs"
+plots["nPV_nominal"                                ]['xTitle'] = "Number of PVs"
 plots["met_nominal"                                ]['xTitle'] = "E^{missing}_{T} [GeV]"
 plots["mll_nominal"                                ]['xTitle'] = "M_{ll} [GeV]"
 plots["njet_nominal"                               ]['xTitle'] = "Number of jets"
