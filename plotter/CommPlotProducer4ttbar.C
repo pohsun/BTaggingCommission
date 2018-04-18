@@ -781,9 +781,12 @@ void CommPlotProducer4ttbar::calcPUWgt(float *wgt)
 
 void CommPlotProducer4ttbar::calcQCDWgt(float *wgt, TH1F *wgtcounter)
 {//{{{
-    if (!isData && GetBranch("ttbar_nw",0) > 17){
-        wgt[1] = GetBranch("ttbar_w",9)*(wgtcounter->GetBinContent(10)/wgtcounter->GetBinContent(1))/GetBranch("ttbar_w",0);
-        wgt[2] = GetBranch("ttbar_w",5)*(wgtcounter->GetBinContent( 6)/wgtcounter->GetBinContent(1))/GetBranch("ttbar_w",0);
+    if (!isData){
+        if (GetBranch("ttbar_nw",0) != 0) wgt[0] = GetBranch("ttbar_w",0);
+        if (GetBranch("ttbar_nw",0) > 17){
+            wgt[1] = GetBranch("ttbar_w",9)*(wgtcounter->GetBinContent(10)/wgtcounter->GetBinContent(1));
+            wgt[2] = GetBranch("ttbar_w",5)*(wgtcounter->GetBinContent( 6)/wgtcounter->GetBinContent(1));
+        }
     }
 }//}}} 
 
