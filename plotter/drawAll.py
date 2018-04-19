@@ -279,7 +279,6 @@ def draw(cfg, isLog=False):
         rp.GetXaxis().SetTitle(cfg['xTitle'])
         rp.GetUpperRefYaxis().SetTitle(cfg['yTitle'])
         rp.GetLowerRefYaxis().SetTitle("Ratio")
-        histTotal[1].Draw("SAME "+cfg['drawOpt'][0])
         rpLeg.Draw()
         drawLatexCMS    ()
         drawLatexLumi   (x=0.88,y=0.92)

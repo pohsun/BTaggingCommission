@@ -18,7 +18,7 @@ rootDir         = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeas
 scriptDir       = "/".join(os.path.realpath(__file__).split('/')[:-1])
 eosCmd          = '/usr/bin/eos'
 defaultQueue    = '8nh'
-batchSize       = 100
+batchSize       = 50
 CWD             = os.environ['PWD']
 
 # File listers
@@ -233,7 +233,7 @@ def merge(args):
             hPuWgtNorms = root_file.Get("puWgtNorms")
             puWgtNormScale={}
             for iBin in range(1, hPuWgtNorms.GetNbinsX()+1, 2):
-                sf   = hPuWgtNorms.GetBinContent(iBin) / hPuWgtNorms.GetBinContent(iBin+1) if groupVal['xsec'][datasetIdx] > 0 else 1.
+                sf   = (hPuWgtNorms.GetBinContent(iBin)/hPuWgtNorms.GetBinContent(iBin+1)) if groupVal['xsec'][datasetIdx] > 0 else 1.
                 name = "_{0}".format(hPuWgtNorms.GetXaxis().GetBinLabel(iBin).split("_")[-1])
                 puWgtNormScale[name]=sf
             print "{0:10} -- Events: {1:.3f} (all); xsec: {2:.3E}; scale: {3:.3E}".format(datasetKey, nEventsAll, dataset[datasetKey]['xsec'], lumiScale*puWgtNormScale['_nominal'])
