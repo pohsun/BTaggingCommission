@@ -772,10 +772,10 @@ std::bitset<8> CommPlotProducer4ttbar::passTrackSel(int chan, int trkIdx)
 void CommPlotProducer4ttbar::calcPUWgt(float *wgt)
 {//{{{
     if (!isData && puWgtGr != 0){
-        int nPUtrue = round(GetBranch("nPUtrue",0));
-        wgt[0] = nPUtrue < 95 && nPUtrue >= 0 ? puWgtGr  ->Eval(nPUtrue) : 0;
-        wgt[1] = nPUtrue < 95 && nPUtrue >= 0 ? puWgtDoGr->Eval(nPUtrue) : 0;
-        wgt[2] = nPUtrue < 95 && nPUtrue >= 0 ? puWgtUpGr->Eval(nPUtrue) : 0;
+        int nPUtrue = GetBranch("nPUtrue",0);
+        wgt[0] = nPUtrue < 99 && nPUtrue >= 0 ? puWgtGr  ->Eval(nPUtrue) : 0;
+        wgt[1] = nPUtrue < 99 && nPUtrue >= 0 ? puWgtDoGr->Eval(nPUtrue) : 0;
+        wgt[2] = nPUtrue < 99 && nPUtrue >= 0 ? puWgtUpGr->Eval(nPUtrue) : 0;
     }
 }//}}}
 
