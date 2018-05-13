@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# vim:set sts=4 sw=4 fdm=syntax foldlevel=1 et:
+# vim:set sts=4 sw=4 fdm=indent foldlevel=0 foldnestmax=2 et:
 
 import os,imp
 from ROOT import TFile
@@ -165,7 +165,6 @@ def setDefaultLegend(leg):
     leg.SetFillColor(0);
     return leg
 
-
 def drawLatexCMS(x=0.10, y=0.94):
     latex.SetTextSize(0.065);
     latex.SetTextFont(62);
@@ -216,43 +215,58 @@ def draw(cfg, isLog=False):
     SetTdrStyle()
     canvas.SetLogy(isLog)
 
-    fIn = TFile.Open(cfi.mergedInputFile)
-    hists = [ fIn.Get(cfg['name']+postfix) for postfix in cfg['postfix'] ]
-    histTotal = [0,0]
+    fIn = [ TFile.Open(f) for f in cfi.mergedInputFile ]
 
-    # Stack and Total
-    hStack = THStack("hstack","")
-    for hIdx, hist in enumerate(hists):
-        isData = cfg['isData'][hIdx]
+    for dIdx, data in enumerate(cfg['data']):
+        data['hist']=[ fIn[data['fileIndex']].Get(cfg['name']+postfix) for postfix in data['postfix'] ]
+        for hIdx, hist in enumerate(data['hist']):
+            hist.GetXaxis().SetTitle(cfg['xTitle'])
+            hist.GetYaxis().SetTitle(cfg['yTitle'])
+            if data['isData']:
+                hist.SetFillColor  (data['fillColor'][hIdx][0])
+                hist.SetMarkerStyle(data['fillColor'][hIdx][1])
+                hist.SetMarkerSize(0.75)
+            else:
+                hist.SetFillColor  (data['fillColor'][hIdx])
 
-        hist.GetXaxis().SetTitle(cfg['xTitle'])
-        hist.GetYaxis().SetTitle(cfg['yTitle'])
-        if isData:
-            hist.SetMarkerStyle(cfg['fillColor'][hIdx])
-            hist.SetMarkerSize(0.75)
+        # Merge total plots
+        print data
+        hTotalName = "{0}_total_{1}".format(cfg['name'], dIdx)
+        for hIdx, hist in enumerate(data['hist']):
+            if 'hTotal' in data.keys():
+                data['hTotal'].Add(hist)
+            else:
+                if data['isData']:
+                    data['hTotal'] = hist.Clone(hTotalName)
+                else:
+                    data['hTotal'] = THStack(hTotalName,"")
+                    data['hTotal'].Print()
+                    data['hTotal'].Add(hist)
+
+        # Create ratio plots
+        if 'hRatio' in cfg.keys() and data['hTotal'].InheritsFrom("TH1"):
+            cfg['hRatio'].append( [TRatioPlot(cfg['data'][0]['hTotal'], data['hTotal'], opt) for opt in cfg['ratioOpts']])
         else:
-            hist.SetFillColor  (cfg['fillColor'][hIdx])
-            hStack.Add(hist)
-
-        # Fill to total
-        if histTotal[isData] == 0:
-            histTotal[isData] = hist.Clone("{0}_total_{1}".format(cfg['name'], "data" if isData else "mc"));
-        else:
-            histTotal[isData].Add(hist);
+            cfg['hRatio'] = [[],]
 
     # Legend
     stLeg  = TLegend(*cfg['stLegPos'])
     setDefaultLegend(stLeg)
-    stLeg.AddEntry(histTotal[1], cfg['legend'][0], "ep")
-    for hIdx, hist in enumerate(hists):
-        if not cfg['isData'][hIdx]:
-            stLeg.AddEntry(hist,cfg['legend'][hIdx],"f")
+    for data in cfg['data']:
+        if data['isData']:
+            stLeg.AddEntry(data['hTotal'], data['legend'][0], "ep")
+        else:
+            for hIdx, hist in enumerate(data['hist']):
+                stLeg.AddEntry(hist,data['legend'][hIdx],"f")
 
     # Latex labels
-    hStack.Draw(cfg['stackOpt'])
-    hStack.GetXaxis().SetTitle(cfg['xTitle'])
-    hStack.GetYaxis().SetTitle(cfg['yTitle'])
-    histTotal[1].Draw("SAME "+cfg['drawOpt'][0])
+    for dIdx, data in enumerate(cfg['data']):
+        if dIdx == 0:
+            data['hTotal'].Draw(data['drawOpt'])
+            data['hTotal'].GetXaxis().SetTitle(cfg['xTitle'])
+            data['hTotal'].GetYaxis().SetTitle(cfg['yTitle'])
+        else:
+            data['hTotal'].Draw("SAME "+data['drawOpt'])
     stLeg.Draw()
     drawLatexCMS    ()
     drawLatexLumi   (x=0.89,y=0.89)
@@ -267,26 +281,27 @@ def draw(cfg, isLog=False):
         canvas.Print(os.path.join(cfi.outputDir,"hstack_{0}{1}.{2}".format(cfg['name'],"_log" if isLog else "",oFormat)))
 
     # Ratio
-    hRatio = [ TRatioPlot(hStack, histTotal[1],opt) for opt in cfg['ratioOpts'] ]
     rpLeg  = TLegend(stLeg)
     rpLeg.SetX1NDC(cfg['rpLegPos'][0]);
     rpLeg.SetY1NDC(cfg['rpLegPos'][1]);
     rpLeg.SetX2NDC(cfg['rpLegPos'][2]);
     rpLeg.SetY2NDC(cfg['rpLegPos'][3]);
 
-    for rpIdx, rp in enumerate(hRatio):
-        rp.Draw("")
-        rp.GetXaxis().SetTitle(cfg['xTitle'])
-        rp.GetUpperRefYaxis().SetTitle(cfg['yTitle'])
-        rp.GetLowerRefYaxis().SetTitle("Ratio")
-        rpLeg.Draw()
-        drawLatexCMS    ()
-        drawLatexLumi   (x=0.88,y=0.92)
-        drawLatexJetType(x=0.50,y=0.89)
-        drawLatexSel    (x=0.50,y=0.84)
-        if "rpExtra" in cfg.keys():
-            exec cfg['rpExtra']
+    for oIdx, rpOpt in enumerate(cfg['ratioOpts']):
+        for dIdx, rp in enumerate(cfg['hRatio'][1:],start=1):
+            rp[oIdx].Draw("" if dIdx == 1 else "SAME")
+            rp[oIdx].GetXaxis().SetTitle(cfg['xTitle'])
+            rp[oIdx].GetUpperRefYaxis().SetTitle(cfg['yTitle'])
+            rp[oIdx].GetLowerRefYaxis().SetTitle("Ratio")
+            rpLeg.Draw()
+            drawLatexCMS    ()
+            drawLatexLumi   (x=0.88,y=0.92)
+            drawLatexJetType(x=0.50,y=0.89)
+            drawLatexSel    (x=0.50,y=0.84)
+            if "rpExtra" in cfg.keys():
+                exec cfg['rpExtra']
         for oFormat in cfi.outputFormats:
             canvas.Update()
-            canvas.Print(os.path.join(cfi.outputDir,"hratio_{0}_{1}{2}.{3}".format(cfg['ratioOpts'][rpIdx],cfg['name'],"_log" if isLog else "",oFormat)))
+            canvas.Print(os.path.join(cfi.outputDir,"hratio_{0}_{1}{2}.{3}".format(rpOpt,cfg['name'],"_log" if isLog else "",oFormat)))
     pass
+

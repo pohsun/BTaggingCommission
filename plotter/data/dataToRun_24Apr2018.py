@@ -42,7 +42,7 @@ dataset['runF-v1'] = {
 }
 
 # Ref xsec: https://twiki.cern.ch/twiki/bin/view/CMS/SummaryTable1G25ns
-mcDir="/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2017/crab/03Mar2018_newJEC/229e0c9"
+mcDir="/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2017/crab/24Apr2018_deepFlavour/d93a314"
 dataset['ttbar'] = {
     'xsec'              : 87.31, #831.66 for TT, 87.31 for TTTo2L2Nu
     'ipath'             : [mcDir+'/TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8/crab_MC13TeV_TTJets'],
@@ -51,7 +51,7 @@ dataset['ttbar'] = {
 
 dataset['dy1'] = {
     'xsec'              : 18610.,
-    'ipath'             : [mcDir+'/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/crab_MC13TeV_DY10to50'],
+    'ipath'             : ['/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2017/crab/03Mar2018_newJEC/229e0c9'+'/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/crab_MC13TeV_DY10to50'],
     'puWgtUrl'          : defalutPUWgtUrl,
 }
 

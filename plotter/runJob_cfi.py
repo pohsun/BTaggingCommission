@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # vim: set sts=4 sw=4 fdm=syntax et:
 
+runEras={
+    'Run2017B':[297020,299329],
+    'Run2017C':[299337,302029],
+    'Run2017D':[302030,303434],
+    'Run2017E':[303435,304826],
+    'Run2017F':[304911,306462]
+}
+
 tagWPs = {}
 tagWPs['CSVv2T'] = {
     'varName':"Jet_CombIVF",
