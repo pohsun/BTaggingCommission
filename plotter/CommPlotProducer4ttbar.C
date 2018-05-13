@@ -11,9 +11,10 @@
 #include <string.h>
 #include <typeinfo>
 #include <bitset>
+#include <algorithm>
 
-#include "TLeaf.h"
 #include "TString.h"
+#include "TLeaf.h"
 
 #include "TMath.h"
 #include "TLorentzVector.h"
@@ -22,6 +23,7 @@
 
 #include "TH1D.h"
 #include "TGraph.h"
+#include "TProfile.h"
 
 #define BIGNUMBER 9999
 #define PI 3.14159265359
@@ -43,6 +45,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
     int qcdWgtBit   = 0;
     int trigWgtBit  = 0;
     int lepEffWgtBit= 0;
+    std::sort(runRanges.begin(),runRanges.end());
     SetBranchAddress();// Load branches;
 
     // Build base EntryList
@@ -107,6 +110,7 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
         //-------------------------------------------------//
         //------------------Most used variables------------//
         //-------------------------------------------------//
+        int run = GetBranch("Run",0);
         TLorentzVector lep0, lep1;
         lep0.SetPtEtaPhiM(GetBranch("ttbar_lpt",0),GetBranch("ttbar_leta",0),GetBranch("ttbar_lphi",0),GetBranch("ttbar_lm",0));
         lep1.SetPtEtaPhiM(GetBranch("ttbar_lpt",1),GetBranch("ttbar_leta",1),GetBranch("ttbar_lphi",1),GetBranch("ttbar_lm",1));
@@ -174,25 +178,25 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
 
             for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){//{{{// Fill Jet info
                 if (!v_evtList[iterEvL->second]->Contains(jentry)) continue;
-                FillHistoBtag(TString::Format("jet_pt_%s"               , iterEvL->first.c_str()) , jet_flav , isPU , jet_pt               , evtWgt);
-                FillHistoBtag(TString::Format("jet_eta_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_eta              , evtWgt);
-                FillHistoBtag(TString::Format("sv_multi_0_%s"           , iterEvL->first.c_str()) , jet_flav , isPU , jet_SV_multi         , evtWgt);
+                FillHistoBtag(TString::Format("btag_jet_pt_%s"               , iterEvL->first.c_str()) , jet_flav , isPU , jet_pt               , evtWgt);
+                FillHistoBtag(TString::Format("btag_jet_eta_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_eta              , evtWgt);
+                FillHistoBtag(TString::Format("btag_sv_multi_0_%s"           , iterEvL->first.c_str()) , jet_flav , isPU , jet_SV_multi         , evtWgt);
 
-                FillHistoBtag(TString::Format("tag_TCHE_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHE             , evtWgt);
-                FillHistoBtag(TString::Format("tag_TCHP_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHP             , evtWgt);
-                FillHistoBtag(TString::Format("tag_JP_%s"               , iterEvL->first.c_str()) , jet_flav , isPU , jet_JP               , evtWgt);
-                FillHistoBtag(TString::Format("tag_JBP_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_JBP              , evtWgt);
-                FillHistoBtag(TString::Format("tag_SSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSV              , evtWgt);
-                FillHistoBtag(TString::Format("tag_SSVHP_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSVHP            , evtWgt);
-                FillHistoBtag(TString::Format("tag_CSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSV              , evtWgt);
-                FillHistoBtag(TString::Format("tag_CSVv2_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSVv2            , evtWgt);
-                FillHistoBtag(TString::Format("tag_cMVAv2_%s"           , iterEvL->first.c_str()) , jet_flav , isPU , jet_cMVAv2           , evtWgt);
-                FillHistoBtag(TString::Format("tag_DeepCSVBDisc_%s"     , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepCSVBDisc     , evtWgt);
-                FillHistoBtag(TString::Format("tag_DeepFlavourBDisc_%s" , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepFlavourBDisc , evtWgt);
-                FillHistoBtag(TString::Format("tag_DeepFlavourCvsB_%s"  , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepFlavourCVSB  , evtWgt);
-                FillHistoBtag(TString::Format("tag_DeepFlavourCvsL_%s"  , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepFlavourCVSL  , evtWgt);
-                FillHistoBtag(TString::Format("tag_CvsB_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_CvsB             , evtWgt);
-                FillHistoBtag(TString::Format("tag_CvsL_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_CvsL             , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_TCHE_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHE             , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_TCHP_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHP             , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_JP_%s"               , iterEvL->first.c_str()) , jet_flav , isPU , jet_JP               , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_JBP_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_JBP              , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_SSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSV              , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_SSVHP_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSVHP            , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_CSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSV              , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_CSVv2_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSVv2            , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_cMVAv2_%s"           , iterEvL->first.c_str()) , jet_flav , isPU , jet_cMVAv2           , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_DeepCSVBDisc_%s"     , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepCSVBDisc     , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_DeepFlavourBDisc_%s" , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepFlavourBDisc , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_DeepFlavourCvsB_%s"  , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepFlavourCVSB  , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_DeepFlavourCvsL_%s"  , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepFlavourCVSL  , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_CvsB_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_CvsB             , evtWgt);
+                FillHistoBtag(TString::Format("btag_tag_CvsL_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_CvsL             , evtWgt);
             }//}}}
 
             // Track information
@@ -212,19 +216,19 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
                     for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){
                         if (!v_evtList[iterEvL->second]->Contains(jentry)) continue;
                         if (isGoodTrack) nTrackSel[iterEvL->second]++;
-                        if (isGoodTrack || track_bits[0] == 0) FillHistoBtag(TString::Format("track_pt_%s",  iterEvL->first.c_str()),    jet_flav, isPU ,track_pt        ,evtWgt);
-                        if (isGoodTrack || track_bits[1] == 0) FillHistoBtag(TString::Format("track_nHit_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_nHitAll   ,evtWgt);
-                        if (isGoodTrack || track_bits[2] == 0) FillHistoBtag(TString::Format("track_HPix_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_nHitPixel ,evtWgt);
-                        if (isGoodTrack || track_bits[3] == 0) FillHistoBtag(TString::Format("track_chi2_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_chi2      ,evtWgt);
-                        if (isGoodTrack || track_bits[4] == 0) FillHistoBtag(TString::Format("track_dist_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_dist      ,evtWgt);
-                        if (isGoodTrack || track_bits[5] == 0) FillHistoBtag(TString::Format("track_len_%s", iterEvL->first.c_str()),    jet_flav, isPU ,track_length    ,evtWgt);
-                        if (isGoodTrack || track_bits[6] == 0) FillHistoBtag(TString::Format("track_IP_%s",  iterEvL->first.c_str()),    jet_flav, isPU ,track_IP        ,evtWgt);
-                        if (isGoodTrack || track_bits[7] == 0) FillHistoBtag(TString::Format("track_IPs_%s", iterEvL->first.c_str()),    jet_flav, isPU ,track_IPsig     ,evtWgt);
+                        if (isGoodTrack || track_bits[0] == 0) FillHistoBtag(TString::Format("btag_track_pt_%s",  iterEvL->first.c_str()),    jet_flav, isPU ,track_pt        ,evtWgt);
+                        if (isGoodTrack || track_bits[1] == 0) FillHistoBtag(TString::Format("btag_track_nHit_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_nHitAll   ,evtWgt);
+                        if (isGoodTrack || track_bits[2] == 0) FillHistoBtag(TString::Format("btag_track_HPix_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_nHitPixel ,evtWgt);
+                        if (isGoodTrack || track_bits[3] == 0) FillHistoBtag(TString::Format("btag_track_chi2_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_chi2      ,evtWgt);
+                        if (isGoodTrack || track_bits[4] == 0) FillHistoBtag(TString::Format("btag_track_dist_%s",iterEvL->first.c_str()),    jet_flav, isPU ,track_dist      ,evtWgt);
+                        if (isGoodTrack || track_bits[5] == 0) FillHistoBtag(TString::Format("btag_track_len_%s", iterEvL->first.c_str()),    jet_flav, isPU ,track_length    ,evtWgt);
+                        if (isGoodTrack || track_bits[6] == 0) FillHistoBtag(TString::Format("btag_track_IP_%s",  iterEvL->first.c_str()),    jet_flav, isPU ,track_IP        ,evtWgt);
+                        if (isGoodTrack || track_bits[7] == 0) FillHistoBtag(TString::Format("btag_track_IPs_%s", iterEvL->first.c_str()),    jet_flav, isPU ,track_IPsig     ,evtWgt);
                     }
                 }
             }//}}}end tracks loop
             for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){
-                FillHistoBtag(TString::Format("track_multi_sel_%s",iterEvL->first.c_str()), jet_flav, isPU ,nTrackSel[iterEvL->second], evtWgt);
+                FillHistoBtag(TString::Format("btag_track_multi_sel_%s",iterEvL->first.c_str()), jet_flav, isPU ,nTrackSel[iterEvL->second], evtWgt);
             }
 
             // SV information
@@ -236,10 +240,10 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
                 float   sv_phi         = GetBranch("SV_vtx_phi",    jet_nFirstSV);
                 for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){
                     if (!v_evtList[iterEvL->second]->Contains(jentry)) continue;
-                    FillHistoBtag(TString::Format("sv_deltaR_jet_%s", iterEvL->first.c_str()),  jet_flav, isPU ,sv_dR_jet          , evtWgt);
-                    FillHistoBtag(TString::Format("sv_eta_%s",        iterEvL->first.c_str()),  jet_flav, isPU ,sv_eta             , evtWgt);
-                    FillHistoBtag(TString::Format("sv_phi_%s",        iterEvL->first.c_str()),  jet_flav, isPU ,sv_phi             , evtWgt);
-                    FillHistoBtag(TString::Format("sv_flight3DSig_%s",iterEvL->first.c_str()),  jet_flav, isPU ,sv_flight3DSig     , evtWgt);
+                    FillHistoBtag(TString::Format("btag_sv_deltaR_jet_%s", iterEvL->first.c_str()),  jet_flav, isPU ,sv_dR_jet          , evtWgt);
+                    FillHistoBtag(TString::Format("btag_sv_eta_%s",        iterEvL->first.c_str()),  jet_flav, isPU ,sv_eta             , evtWgt);
+                    FillHistoBtag(TString::Format("btag_sv_phi_%s",        iterEvL->first.c_str()),  jet_flav, isPU ,sv_phi             , evtWgt);
+                    FillHistoBtag(TString::Format("btag_sv_flight3DSig_%s",iterEvL->first.c_str()),  jet_flav, isPU ,sv_flight3DSig     , evtWgt);
                 }
             }//}}}
 
@@ -265,12 +269,12 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
             }//}}}
 
             for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){//{{{ Fill PFMuon
-                FillHistoBtag(TString::Format("pfmuon_multi_%s",iterEvL->first.c_str()),  jet_flav, isPU , nPFmu[iterEvL->second]   ,evtWgt);
+                FillHistoBtag(TString::Format("btag_pfmuon_multi_%s",iterEvL->first.c_str()),  jet_flav, isPU , nPFmu[iterEvL->second]   ,evtWgt);
                 if (indPFmu[iterEvL->second]>-1){
-                    FillHistoBtag(TString::Format("pfmuon_pt_%s"          , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_pt"          , indPFmu[iterEvL->second]) , evtWgt);
-                    FillHistoBtag(TString::Format("pfmuon_eta_%s"         , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_eta"         , indPFmu[iterEvL->second]) , evtWgt);
-                    FillHistoBtag(TString::Format("pfmuon_phi_%s"         , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_phi"         , indPFmu[iterEvL->second]) , evtWgt);
-                    FillHistoBtag(TString::Format("pfmuon_ptrel_%s"       , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_ptrel"       , indPFmu[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfmuon_pt_%s"          , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_pt"          , indPFmu[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfmuon_eta_%s"         , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_eta"         , indPFmu[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfmuon_phi_%s"         , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_phi"         , indPFmu[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfmuon_ptrel_%s"       , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFMuon_ptrel"       , indPFmu[iterEvL->second]) , evtWgt);
                 }
             }//}}}
 
@@ -296,36 +300,41 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
             }//}}}
 
             for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){//{{{ Fill PFElectron
-                FillHistoBtag(TString::Format("pfelectron_multi_%s", iterEvL->first.c_str()),  jet_flav, isPU , nPFel[iterEvL->second]   ,evtWgt);
+                FillHistoBtag(TString::Format("btag_pfelectron_multi_%s", iterEvL->first.c_str()),  jet_flav, isPU , nPFel[iterEvL->second]   ,evtWgt);
                 if (indPFel[iterEvL->second]>-1){
-                    FillHistoBtag(TString::Format("pfelectron_pt_%s"       , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_pt"       , indPFel[iterEvL->second]) , evtWgt);
-                    FillHistoBtag(TString::Format("pfelectron_eta_%s"      , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_eta"      , indPFel[iterEvL->second]) , evtWgt);
-                    FillHistoBtag(TString::Format("pfelectron_phi_%s"      , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_phi"      , indPFel[iterEvL->second]) , evtWgt);
-                    FillHistoBtag(TString::Format("pfelectron_ptrel_%s"    , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_ptrel"    , indPFel[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfelectron_pt_%s"       , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_pt"       , indPFel[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfelectron_eta_%s"      , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_eta"      , indPFel[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfelectron_phi_%s"      , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_phi"      , indPFel[iterEvL->second]) , evtWgt);
+                    FillHistoBtag(TString::Format("btag_pfelectron_ptrel_%s"    , iterEvL->first.c_str()) , jet_flav , isPU , GetBranch("PFElectron_ptrel"    , indPFel[iterEvL->second]) , evtWgt);
                 }
             }//}}}
 
         }//}}} End Loop on Jets
 
         // Fill Commissioning plots
-        int     nPV = round(GetBranch("nPV",0));
+        int     nPV = GetBranch("nPV",0);
         float   met = GetBranch("ttbar_metpt",0);
         for (std::map<std::string, int>::iterator iterEvL=m_evtList.begin(); iterEvL != m_evtList.end(); iterEvL++){//{{{
             if (!v_evtList[iterEvL->second]->Contains(jentry)) continue;
             sumWeight       [iterEvL->second]+=puWgt[puWgtBit]*qcdWgt[qcdWgtBit]*trigWgt[trigWgtBit]*lepEffWgt[lepEffWgtBit];
             sumWeightNoPU   [iterEvL->second]+=                qcdWgt[qcdWgtBit]*trigWgt[trigWgtBit]*lepEffWgt[lepEffWgtBit];
-            FillHistoTTbar(TString::Format("nPV_%s"            , iterEvL->first.c_str()) , nPV                  , evtWgt);
-            FillHistoTTbar(TString::Format("met_%s"            , iterEvL->first.c_str()) , met                  , evtWgt);
-            FillHistoTTbar(TString::Format("mll_%s"            , iterEvL->first.c_str()) , (lep0+lep1).Mag()    , evtWgt);
-            FillHistoTTbar(TString::Format("njet_%s"           , iterEvL->first.c_str()) , selJets.size()       , evtWgt);
-            FillHistoTTbar(TString::Format("njet_pt30_%s"      , iterEvL->first.c_str()) , njet_pt30            , evtWgt);
-            FillHistoTTbar(TString::Format("lep0_pt_%s"        , iterEvL->first.c_str()) , lep0.Pt()            , evtWgt);//??
-            FillHistoTTbar(TString::Format("lep1_pt_%s"        , iterEvL->first.c_str()) , lep1.Pt()            , evtWgt);//??
-            FillHistoTTbar(TString::Format("jet0_pt_%s"        , iterEvL->first.c_str()) , jet0_pt              , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_nPV_%s"            , iterEvL->first.c_str()) , nPV                  , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_nPV_noWgt_%s"      , iterEvL->first.c_str()) , nPV                  , 1);
+            FillHistoTTbar(TString::Format("ttbar_met_%s"            , iterEvL->first.c_str()) , met                  , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_mll_%s"            , iterEvL->first.c_str()) , (lep0+lep1).Mag()    , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_njet_%s"           , iterEvL->first.c_str()) , selJets.size()       , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_njet_pt30_%s"      , iterEvL->first.c_str()) , njet_pt30            , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_lep0_pt_%s"        , iterEvL->first.c_str()) , lep0.Pt()            , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_lep1_pt_%s"        , iterEvL->first.c_str()) , lep1.Pt()            , evtWgt);
+            FillHistoTTbar(TString::Format("ttbar_jet0_pt_%s"        , iterEvL->first.c_str()) , jet0_pt              , evtWgt);
+            FillHistoProf (TString::Format("prof_nPV_%s"            , iterEvL->first.c_str()) , run      ,nPV                    , evtWgt);
+            FillHistoProf (TString::Format("prof_njet_%s"           , iterEvL->first.c_str()) , run      ,selJets.size()         , evtWgt);
             // Count of tagged jets
             for (std::map<std::string, int>::iterator iterTagWP=m_tagWP.begin(); iterTagWP != m_tagWP.end(); iterTagWP++){
-                FillHistoTTbar(TString::Format("nBtag_%s_%s"            ,iterTagWP->first.c_str(),iterEvL->first.c_str()), v_tagWPCounter           [iterTagWP->second] , evtWgt);
-                FillHistoTTbar(TString::Format("nBtag_afterJetSel_%s_%s",iterTagWP->first.c_str(),iterEvL->first.c_str()), v_tagWPCounter_selJet30  [iterTagWP->second] , evtWgt);
+                FillHistoTTbar(TString::Format("ttbar_nBtag_%s_%s"            ,iterTagWP->first.c_str(),iterEvL->first.c_str()), v_tagWPCounter           [iterTagWP->second] , evtWgt);
+                FillHistoTTbar(TString::Format("ttbar_nBtag_afterJetSel_%s_%s",iterTagWP->first.c_str(),iterEvL->first.c_str()), v_tagWPCounter_selJet30  [iterTagWP->second] , evtWgt);
+                FillHistoProf (TString::Format("prof_nBtag_%s_%s"            ,iterTagWP->first.c_str(),iterEvL->first.c_str()), run, v_tagWPCounter           [iterTagWP->second] , evtWgt);
+                FillHistoProf (TString::Format("prof_nBtag_afterJetSel_%s_%s",iterTagWP->first.c_str(),iterEvL->first.c_str()), run, v_tagWPCounter_selJet30  [iterTagWP->second] , evtWgt);
             }
         }//}}}
     }//}}} End event loop.
@@ -340,11 +349,14 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
     fout->cd();
     totalGenEvts->Write();
     puWgtNorms  ->Write();
-    for (unsigned int i=0; i<v_histoTTbar.size(); i++){
-        v_histoTTbar[i]->Write();
+    for (auto& h: v_histoTTbar){
+        h->Write();
     }
-    for (unsigned int i=0; i<v_histoBtag .size(); i++){
-        v_histoBtag[i]->Write();
+    for (auto& h: v_histoBtag){
+        h->Write();
+    }
+    for (auto& h: v_histoProf){
+        h->Write();
     }
 
     fout->Close();
@@ -520,6 +532,17 @@ void CommPlotProducer4ttbar::AddSubEventList(TString name, TString cut)
     }
 }//}}}
 
+int CommPlotProducer4ttbar::AddRunRange(int run)
+{//{{{
+    for(auto& r: runRanges){
+        if (run == r){
+            return runRanges.size();
+        }
+    }
+    runRanges.push_back(run);
+    return runRanges.size();
+}//}}}
+
 void CommPlotProducer4ttbar::AddHistoBtag(TString name, TString title, int nbins, float min, float max)
 {//{{{
 
@@ -552,70 +575,97 @@ void CommPlotProducer4ttbar::AddHistoTTbar(TString name, TString title, int nbin
     v_histoTTbar.push_back(h);
 }//}}}
 
+void CommPlotProducer4ttbar::AddHistoProf(TString name, TString title, int nbins, float *bins)
+{//{{{
+    TProfile *p = new TProfile(name, title, nbins, bins);
+
+    m_histoProf[name.Data()] = v_histoProf.size();
+    v_histoProf.push_back(p);
+}//}}}
+
+void CommPlotProducer4ttbar::AddHistoProf(TString name, TString title)
+{//{{{
+
+    const int nbins = runRanges.size()-1;
+    float bins[nbins+1];
+    for(int iR=0; iR<=nbins; iR++){
+        bins[iR]=runRanges[iR];
+    }
+    TProfile *p = new TProfile(name, title, nbins, bins);
+
+    m_histoProf[name.Data()] = v_histoProf.size();
+    v_histoProf.push_back(p);
+}//}}}
+
 void CommPlotProducer4ttbar::AddHistos(const char* tag)
 {//{{{
     // Event Info
-    AddHistoTTbar(TString::Format("nPV_%s" ,tag)           , "Number of PV"             , 100 , -0.5 , 99.5);
-    AddHistoTTbar(TString::Format("met_%s",tag)            , "MET"                      , 30  , 0    , 300);
-    AddHistoTTbar(TString::Format("mll_%s",tag)            , "M_{ll}"                   , 60  , 0    , 300);
-    AddHistoTTbar(TString::Format("njet_%s",tag)           , "Number of jets"           , 10  , -0.5 , 9.5);
-    AddHistoTTbar(TString::Format("njet_pt30_%s",tag)      , "Number of jets pt30"      , 10  , -0.5 , 9.5);
-    AddHistoTTbar(TString::Format("lep0_pt_%s",tag)        , "p_{T}^{leading lep}"      , 50  , 0    , 200);
-    AddHistoTTbar(TString::Format("lep1_pt_%s",tag)        , "p_{T}^{sub-leading lep}"  , 50  , 0    , 200);
-    AddHistoTTbar(TString::Format("jet0_pt_%s",tag)        , "p_{T}^{leading jet}"      , 50  , 0    , 400);
+    AddHistoTTbar(TString::Format("ttbar_nPV_%s" ,tag)           , "Number of PV"             , 100 , -0.5 , 99.5);
+    AddHistoTTbar(TString::Format("ttbar_nPV_noWgt_%s" ,tag)     , "Number of PV"             , 100 , -0.5 , 99.5);
+    AddHistoTTbar(TString::Format("ttbar_met_%s",tag)            , "MET"                      , 30  , 0    , 300);
+    AddHistoTTbar(TString::Format("ttbar_mll_%s",tag)            , "M_{ll}"                   , 60  , 0    , 300);
+    AddHistoTTbar(TString::Format("ttbar_njet_%s",tag)           , "Number of jets"           , 10  , -0.5 , 9.5);
+    AddHistoTTbar(TString::Format("ttbar_njet_pt30_%s",tag)      , "Number of jets pt30"      , 10  , -0.5 , 9.5);
+    AddHistoTTbar(TString::Format("ttbar_lep0_pt_%s",tag)        , "p_{T}^{leading lep}"      , 50  , 0    , 200);
+    AddHistoTTbar(TString::Format("ttbar_lep1_pt_%s",tag)        , "p_{T}^{sub-leading lep}"  , 50  , 0    , 200);
+    AddHistoTTbar(TString::Format("ttbar_jet0_pt_%s",tag)        , "p_{T}^{leading jet}"      , 50  , 0    , 400);
+    AddHistoProf   (TString::Format("prof_nPV_%s", tag)           , "Number of PV"             );
+    AddHistoProf   (TString::Format("prof_njet_%s", tag)          , "Number of jets"           );
     for(std::map<std::string, int>::iterator iterTagWP=m_tagWP.begin(); iterTagWP != m_tagWP.end(); iterTagWP++){
         //AddHistoTTbar(TString::Format("nEvt_run_BTag-%s_%s"     ,iterTagWP->first.c_str(),tag) , "Number of evt VS run"             , 40 , 297020 , 306462);//Fill run
-        AddHistoTTbar(TString::Format("nBtag_%s_%s"             ,iterTagWP->first.c_str(),tag) , "Number of btag jets"              , 6  , -0.5   , 5.5);
-        AddHistoTTbar(TString::Format("nBtag_afterJetSel_%s_%s" ,iterTagWP->first.c_str(),tag) , "Number of btag jets"              , 6  , -0.5   , 5.5);
+        AddHistoTTbar(TString::Format("ttbar_nBtag_%s_%s"             ,iterTagWP->first.c_str(),tag) , "Number of btag jets"              , 6  , -0.5   , 5.5);
+        AddHistoTTbar(TString::Format("ttbar_nBtag_afterJetSel_%s_%s" ,iterTagWP->first.c_str(),tag) , "Number of btag jets"              , 6  , -0.5   , 5.5);
+        AddHistoProf (TString::Format("prof_nBtag_%s_%s"             ,iterTagWP->first.c_str(),tag) , "Number of btag jets"              );
+        AddHistoProf (TString::Format("prof_nBtag_afterJetSel_%s_%s" ,iterTagWP->first.c_str(),tag) , "Number of btag jets"              );
     }
 
     // Jet info
-    AddHistoBtag(TString::Format("jet_pt_%s"               , tag ) , "pT of all jets"                        , 50  , 0      , 400  ) ;
-    AddHistoBtag(TString::Format("jet_eta_%s"              , tag ) , "#eta of all jets"                      , 50  , -2.5   , 2.5  ) ;
+    AddHistoBtag(TString::Format("btag_jet_pt_%s"               , tag ) , "pT of all jets"                        , 50  , 0      , 400  ) ;
+    AddHistoBtag(TString::Format("btag_jet_eta_%s"              , tag ) , "#eta of all jets"                      , 50  , -2.5   , 2.5  ) ;
 
-    AddHistoBtag(TString::Format("sv_multi_0_%s"           , tag ) , "Number of secondary vertex"            , 6   , -0.5   , 5.5  ) ;
-    AddHistoBtag(TString::Format("sv_flight3DSig_%s"       , tag ) , "Flight distance significance 3D"       , 50  , 0.     , 80.  ) ;
-    AddHistoBtag(TString::Format("sv_deltaR_jet_%s"        , tag ) , "SV_#Delta{}R_jet"                      , 50  , 0.     , 0.5  ) ;
-    AddHistoBtag(TString::Format("sv_eta_%s"               , tag ) , "SV #eta"                               , 50  , -2.5   , 2.5  ) ;
-    AddHistoBtag(TString::Format("sv_phi_%s"               , tag ) , "SV #phi"                               , 40  , -1.*PI , PI   ) ;
+    AddHistoBtag(TString::Format("btag_sv_multi_0_%s"           , tag ) , "Number of secondary vertex"            , 6   , -0.5   , 5.5  ) ;
+    AddHistoBtag(TString::Format("btag_sv_flight3DSig_%s"       , tag ) , "Flight distance significance 3D"       , 50  , 0.     , 80.  ) ;
+    AddHistoBtag(TString::Format("btag_sv_deltaR_jet_%s"        , tag ) , "SV_#Delta{}R_jet"                      , 30  , 0.     , 0.3  ) ;
+    AddHistoBtag(TString::Format("btag_sv_eta_%s"               , tag ) , "SV #eta"                               , 50  , -2.5   , 2.5  ) ;
+    AddHistoBtag(TString::Format("btag_sv_phi_%s"               , tag ) , "SV #phi"                               , 40  , -1.*PI , PI   ) ;
 
-    AddHistoBtag(TString::Format("track_multi_sel_%s"      , tag ) , "Number of selected tracks in the jets" , 40  , -0.5   , 39.5 ) ;
-    AddHistoBtag(TString::Format("track_pt_%s"             , tag ) , "p_{T} of the tracks"                   , 100 , 0.     , 30.  ) ;
-    AddHistoBtag(TString::Format("track_nHit_%s"           , tag ) , "Number of hits "                       , 35  , -0.5   , 34.5 ) ;
-    AddHistoBtag(TString::Format("track_HPix_%s"           , tag ) , "Number of hits in the Pixel"           , 10  , -0.5   , 9.5  ) ;
-    AddHistoBtag(TString::Format("track_chi2_%s"           , tag ) , "Normalized #chi^{2} of the tracks"     , 100 , 0.     , 30.  ) ;
-    AddHistoBtag(TString::Format("track_dist_%s"           , tag ) , "Track distance to jet axis length"     , 100 , 0.     , 0.3  ) ;
-    AddHistoBtag(TString::Format("track_len_%s"            , tag ) , "Track decay length"                    , 100 , 0.     , 25.  ) ;
-    AddHistoBtag(TString::Format("track_IP_%s"             , tag ) , "3D IP of all tracks"                   , 100 , -0.1   , 0.1  ) ;
-    AddHistoBtag(TString::Format("track_IPs_%s"            , tag ) , "3D IP significance of all tracks"      , 70 , -35.   , 35.  ) ;
+    AddHistoBtag(TString::Format("btag_track_multi_sel_%s"      , tag ) , "Number of selected tracks in the jets" , 40  , -0.5   , 39.5 ) ;
+    AddHistoBtag(TString::Format("btag_track_pt_%s"             , tag ) , "p_{T} of the tracks"                   , 100 , 0.     , 30.  ) ;
+    AddHistoBtag(TString::Format("btag_track_nHit_%s"           , tag ) , "Number of hits "                       , 35  , -0.5   , 34.5 ) ;
+    AddHistoBtag(TString::Format("btag_track_HPix_%s"           , tag ) , "Number of hits in the Pixel"           , 10  , -0.5   , 9.5  ) ;
+    AddHistoBtag(TString::Format("btag_track_chi2_%s"           , tag ) , "Normalized #chi^{2} of the tracks"     , 100 , 0.     , 5.  ) ;
+    AddHistoBtag(TString::Format("btag_track_dist_%s"           , tag ) , "Track distance to jet axis length"     , 100 , 0.     , 0.1  ) ;
+    AddHistoBtag(TString::Format("btag_track_len_%s"            , tag ) , "Track decay length"                    , 20 , 0.     , 5.  ) ;
+    AddHistoBtag(TString::Format("btag_track_IP_%s"             , tag ) , "3D IP of all tracks"                   , 100 , -0.1   , 0.1  ) ;
+    AddHistoBtag(TString::Format("btag_track_IPs_%s"            , tag ) , "3D IP significance of all tracks"      , 70 , -35.   , 35.  ) ;
 
-    AddHistoBtag(TString::Format("pfmuon_multi_%s"         , tag ) , "Number of pfmuons"                     , 7   , -0.5   , 6.5  ) ;
-    AddHistoBtag(TString::Format("pfmuon_pt_%s"            , tag ) , "PFMuon p_{T}"                          , 50  , 0      , 100  ) ;
-    AddHistoBtag(TString::Format("pfmuon_eta_%s"           , tag ) , "PFMuon #eta"                           , 50  , -2.5      , 2.5  ) ;
-    AddHistoBtag(TString::Format("pfmuon_phi_%s"           , tag ) , "PFMuon #phi"                           , 40  , -1*PI      , PI  ) ;
-    AddHistoBtag(TString::Format("pfmuon_ptrel_%s"         , tag ) , "pT rel. of the muon"                   , 50  , 0      , 5    ) ;
+    AddHistoBtag(TString::Format("btag_pfmuon_multi_%s"         , tag ) , "Number of pfmuons"                     , 6   , -0.5   , 5.5  ) ;
+    AddHistoBtag(TString::Format("btag_pfmuon_pt_%s"            , tag ) , "PFMuon p_{T}"                          , 50  , 0      , 100  ) ;
+    AddHistoBtag(TString::Format("btag_pfmuon_eta_%s"           , tag ) , "PFMuon #eta"                           , 50  , -2.5      , 2.5  ) ;
+    AddHistoBtag(TString::Format("btag_pfmuon_phi_%s"           , tag ) , "PFMuon #phi"                           , 40  , -1*PI      , PI  ) ;
+    AddHistoBtag(TString::Format("btag_pfmuon_ptrel_%s"         , tag ) , "pT rel. of the muon"                   , 50  , 0      , 5    ) ;
 
-    AddHistoBtag(TString::Format("pfelectron_multi_%s"     , tag ) , "Number of pfelectron"                  , 7   , -0.5   , 6.5  ) ;
-    AddHistoBtag(TString::Format("pfelectron_pt_%s"        , tag ) , "PFElectron p_{T}"                      , 50  , 0      , 100  ) ;
-    AddHistoBtag(TString::Format("pfelectron_eta_%s"       , tag ) , "PFElectron #eta"                       , 50  , -2.5      , 2.5  ) ;
-    AddHistoBtag(TString::Format("pfelectron_phi_%s"       , tag ) , "PFElectron #phi"                       , 40  , -1*PI      , PI  ) ;
-    AddHistoBtag(TString::Format("pfelectron_ptrel_%s"     , tag ) , "pT rel. of the pfelectron"             , 50  , 0      , 5    ) ;
+    AddHistoBtag(TString::Format("btag_pfelectron_multi_%s"     , tag ) , "Number of pfelectron"                  , 6   , -0.5   , 5.5  ) ;
+    AddHistoBtag(TString::Format("btag_pfelectron_pt_%s"        , tag ) , "PFElectron p_{T}"                      , 50  , 0      , 100  ) ;
+    AddHistoBtag(TString::Format("btag_pfelectron_eta_%s"       , tag ) , "PFElectron #eta"                       , 50  , -2.5      , 2.5  ) ;
+    AddHistoBtag(TString::Format("btag_pfelectron_phi_%s"       , tag ) , "PFElectron #phi"                       , 40  , -1*PI      , PI  ) ;
+    AddHistoBtag(TString::Format("btag_pfelectron_ptrel_%s"     , tag ) , "pT rel. of the pfelectron"             , 50  , 0      , 5    ) ;
 
-    AddHistoBtag(TString::Format("tag_JP_%s"               , tag ) , "JP"                                    , 30  , 0.     , 1.5  ) ;
-    AddHistoBtag(TString::Format("tag_JBP_%s"              , tag ) , "JBP"                                   , 25  , 0.     , 4.   ) ;
-    AddHistoBtag(TString::Format("tag_SSV_%s"              , tag ) , "CSV"                                   , 70  , 0.     , 7.   ) ;
-    AddHistoBtag(TString::Format("tag_SSVHP_%s"            , tag ) , "CSVv2"                                 , 70  , 0.     , 7.   ) ;
-    AddHistoBtag(TString::Format("tag_CSV_%s"              , tag ) , "CSV"                                   , 50  , 0.     , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_CSVv2_%s"            , tag ) , "CSVv2"                                 , 50  , 0.     , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_DeepCSVBDisc_%s"     , tag ) , "DeepCSVBDisc"                          , 50  , 0.     , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_DeepFlavourBDisc_%s" , tag ) , "DeepFlavourBDisc"                      , 50  , 0.     , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_cMVAv2_%s"           , tag ) , "cMVAv2"                                , 50  , -1.    , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_CvsB_%s"             , tag ) , "CvsB"                                  , 50  , -1.    , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_CvsL_%s"             , tag ) , "CvsL"                                  , 50  , -1.    , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_TCHP_%s"             , tag ) , "TCHP"                                  , 50  , 0.     , 30.  ) ;
-    AddHistoBtag(TString::Format("tag_TCHE_%s"             , tag ) , "TCHP"                                  , 50  , 0.     , 30.  ) ;
-    AddHistoBtag(TString::Format("tag_DeepFlavourCvsB_%s"  , tag ) , "DeepFlavour CvsB"                      , 50  , -1.    , 1.   ) ;
-    AddHistoBtag(TString::Format("tag_DeepFlavourCvsL_%s"  , tag ) , "DeepFlavour CvsL"                      , 50  , -1.    , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_JP_%s"               , tag ) , "JP"                                    , 30  , 0.     , 1.5  ) ;
+    AddHistoBtag(TString::Format("btag_tag_JBP_%s"              , tag ) , "JBP"                                   , 25  , 0.     , 4.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_SSV_%s"              , tag ) , "CSV"                                   , 70  , 0.     , 7.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_SSVHP_%s"            , tag ) , "CSVv2"                                 , 70  , 0.     , 7.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_CSV_%s"              , tag ) , "CSV"                                   , 50  , 0.     , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_CSVv2_%s"            , tag ) , "CSVv2"                                 , 50  , 0.     , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_DeepCSVBDisc_%s"     , tag ) , "DeepCSVBDisc"                          , 50  , 0.     , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_DeepFlavourBDisc_%s" , tag ) , "DeepFlavourBDisc"                      , 50  , 0.     , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_cMVAv2_%s"           , tag ) , "cMVAv2"                                , 50  , -1.    , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_CvsB_%s"             , tag ) , "CvsB"                                  , 50  , -1.    , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_CvsL_%s"             , tag ) , "CvsL"                                  , 50  , -1.    , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_TCHP_%s"             , tag ) , "TCHP"                                  , 50  , 0.     , 30.  ) ;
+    AddHistoBtag(TString::Format("btag_tag_TCHE_%s"             , tag ) , "TCHP"                                  , 50  , 0.     , 30.  ) ;
+    AddHistoBtag(TString::Format("btag_tag_DeepFlavourCvsB_%s"  , tag ) , "DeepFlavour CvsB"                      , 50  ,  0.    , 1.   ) ;
+    AddHistoBtag(TString::Format("btag_tag_DeepFlavourCvsL_%s"  , tag ) , "DeepFlavour CvsL"                      , 50  ,  0.    , 1.   ) ;
     return;
 }//}}}
 
@@ -683,6 +733,20 @@ void CommPlotProducer4ttbar::FillHistoTTbar(TString name, varType value, double 
     int vIndex = m_histoTTbar[name.Data()] ;
     v_histoTTbar[vIndex]->Fill(value,weight);
 }//}}}
+
+template<typename varType>
+void CommPlotProducer4ttbar::FillHistoProf(TString name, varType x, double value, double weight)
+{//{{{
+    if (m_histoProf.find(name.Data()) == m_histoProf.end()){
+        printf("ERROR\t: Profile %s does not exist.\n",name.Data());
+        return;
+    }else{
+        //printf("DEBUG\t: Fill Profile %s.\n",name.Data());
+    }
+    int vIndex = m_histoProf[name.Data()] ;
+    v_histoProf[vIndex]->Fill(x, value, weight);
+}//}}}
+
 
 bool CommPlotProducer4ttbar::passPresel(int chan)
 {//{{{

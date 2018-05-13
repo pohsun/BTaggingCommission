@@ -169,6 +169,9 @@ def runJob(args):
 
     # Load cut, tagger WPs
     runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py"))
+    for eraName, era in runJobConfig.runEras.iteritems():
+        run.AddRunRange(era[0])
+        run.AddRunRange(era[1])
     for wpName, wp in runJobConfig.tagWPs.iteritems():
         run.AddTagWP(wpName, wp['varName'], wp['wp'])
         run.RegBranch(wp['varName']) # maxJets=2000
@@ -276,8 +279,8 @@ def drawAll(args):
 
     for pName, cfg in drawer.cfi.plots.iteritems():
         print cfg
-        drawer.draw(cfg, isLog=False)
-        drawer.draw(cfg, isLog=True)
+        drawer.draw(copy.deepcopy(cfg), isLog=False)
+        drawer.draw(copy.deepcopy(cfg), isLog=True)
 
     pass
 

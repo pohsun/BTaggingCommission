@@ -1,9 +1,4 @@
-//////////////////////////////////////////////////////////
-// This class has been automatically generated on
-// Tue Nov 13 15:05:58 2012 by ROOT version 5.32/00
-// from TTree ttree/ttree
-// found on file: JetTreeTP_Pt-80to120.root
-//////////////////////////////////////////////////////////
+// vim: set sw=4 sts=4 fdm=marker et:
 
 #ifndef CommPlotProducer4ttbar_h
 #define CommPlotProducer4ttbar_h
@@ -28,9 +23,6 @@
 #include <map>
 #include <bitset>
 
-// Header file for the classes stored in the TTree if any.
-
-
 class CommPlotProducer4ttbar
 {
     public:
@@ -43,10 +35,10 @@ class CommPlotProducer4ttbar
         void    AddTrigChannel(int chan);
         void    AddTagWP        (TString tagName, TString varName, float wp);
         bool    SetDefaultTagWP (TString name);
+        int     AddRunRange(int run);
         void    AddSubEventList (TString name, TString cut);
 
         void    Loop(bool isdata, TH1F* wgtcounter);
-            // Selectors. Add needed branched to SetBranchAddress!
 
         void    Clear();
     private:
@@ -55,6 +47,7 @@ class CommPlotProducer4ttbar
         TGraph      *puWgtGr,*puWgtDoGr,*puWgtUpGr;
         TFile       *fout;
         std::vector<int> trigChannels;
+        std::vector<int> runRanges;
 
         // Flags
         int isData;
@@ -86,14 +79,20 @@ class CommPlotProducer4ttbar
         std::map<std::string, int>          m_histoBtag;
         std::vector<TH1D*>                  v_histoTTbar;
         std::map<std::string, int>          m_histoTTbar;
+        std::vector<TProfile*>              v_histoProf;
+        std::map<std::string, int>          m_histoProf;
         void    AddHistoBtag (TString name, TString title,  int nbins, float min, float max);
         void    AddHistoTTbar(TString name, TString title,  int nbins, float min, float max);
+        void    AddHistoProf (TString name, TString title,  int nbins, float *bins);
+        void    AddHistoProf (TString name, TString title);// bins decided by run ranges;
         void    AddHistos(const char*);
         void    AddAllHistos();
         template<typename varType>
         void    FillHistoTTbar(TString name, varType value, double weight=1);
         template<typename varType>
         void    FillHistoBtag (TString name, int flavour, bool isPU, varType value, double weight=1);
+        template<typename varType>
+        void    FillHistoProf  (TString name, varType x, double value, double weight=1);
         template<typename varType1, typename varType2>
         void    FillHisto2D(TString name, int flavour, bool isPU, varType1 value1, varType2 value2, double weight=1);
 
@@ -161,6 +160,7 @@ void CommPlotProducer4ttbar::Clear()
     puWgtUpGr   = 0;
     fout        = 0;
     trigChannels.clear();
+    runRanges   .clear();
 
     // Flags
     isData=-1;
@@ -178,10 +178,12 @@ void CommPlotProducer4ttbar::Clear()
     m_leaf     . clear();//Indexing
 
     // histograms
-    v_histoBtag  . clear();
     v_histoTTbar . clear();
-    m_histoBtag  . clear();
+    v_histoBtag  . clear();
+    v_histoProf  . clear();
     m_histoTTbar . clear();
+    m_histoBtag  . clear();
+    m_histoProf  . clear();
     
 }//}}}
 
