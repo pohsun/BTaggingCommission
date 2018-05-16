@@ -1,72 +1,98 @@
 #!/usr/bin/env python
 # vim:set sts=4 sw=4 fdm=indent et:
 
-import os
+import os, re
 from copy import deepcopy
 from ROOT import kAzure, kRed, kMagenta, kGreen, kOrange, kBlue, kYellow
 
 mergedInputFile = [
-        os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all.root"),
+    os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all.root"),
+    os.path.expandvars("/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20180424_DeepFlavour/CMSSW_9_4_4/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all.root"),
+    os.path.expandvars("/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20180424_DeepFlavour/CMSSW_9_4_4/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all_17NovReReco_Fall17MC.root"),
 ]
 outputDir       = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/Commissioning_plots")
 outputFormats   = ["pdf","png"]
-lumi            = 41.86
+# lumi            = 41.86 # Full2017
+lumi            = 1.03 # Run2018A
 isPrelim        = True
 
 # Define histogram groups
 ttbarMC = {
     'postfix'   :["_ttbar","_dy","_st","_ww","_wz","_zz"],
-    'fileIndex' :0,
+    'fileIndex' :2,
     'legend'    :["t#bar{t}","DY","tW","WW","WZ","ZZ"],
-    'fillColor' :[kRed+1, kAzure-2, kMagenta, kGreen+4, kOrange+2, kBlue+2],
+    'fillColor' :[kRed+1, kAzure-2, kMagenta, kGreen+4, kOrange+2, kBlue+2, 1],
     'drawOpt'   :"HIST",
     'isData'    :False,
+    'forceNorm' :1.034/41.856,
 }
 
 btagMC = {
     'postfix'   :["_b_mc","_pu_mc","_c_mc","_l_mc"],
-    'fileIndex' :0,
+    'fileIndex' :2,
     'legend'    :["b","PU","c","udsg"],
-    'fillColor' :[2,kYellow,8,4],
+    'fillColor' :[2, kYellow, 8, 4, 1],
     'drawOpt'   :"HIST",
     'isData'    :False,
+    'forceNorm' :1.034/41.856,
 }
 
 defaultDATA = {
     'postfix'   :["_data"],
     'fileIndex' :0,
-    'legend'    :["Data"],
-    'fillColor' :[[1,20]],
-    'drawOpt'   :"",
+    'legend'    :["Run2018A"],
+    'fillColor' :[[1,20],[1,20]],
+    'drawOpt'   :"E1",
     'isData'    :True,
+    'forceNorm' : -1 ,
+}
+
+compareDATA1 = {
+    'postfix'   :["_data"],
+    'fileIndex' :1,
+    'legend'    :["Run2017(31Mar2018ReReco)"],
+    'fillColor' :[[kYellow,20],[kYellow,20]],
+    'drawOpt'   :"E1",
+    'isData'    :True,
+    'forceNorm' : 1.034/41.856,
+}
+
+compareDATA2 = {
+    'postfix'   :["_data"],
+    'fileIndex' :2,
+    'legend'    :["Run2017(17Nov2017ReReco)"],
+    'fillColor' :[[3,20],[3,20]],
+    'drawOpt'   :"E1",
+    'isData'    :True,
+    'forceNorm' : 1.034/41.856,
 }
 
 # Define config for plotters
 ttbarConfig = {
-    'data'      :[ttbarMC, defaultDATA],
+    'data'      :[ttbarMC, defaultDATA, compareDATA1, compareDATA2],
     'xTitle'    :"",
     'yTitle'    :"Events",
-    'stLegPos'  :[0.75,0.58,0.89,0.84],
+    'stLegPos'  :[0.75,0.58,0.89,0.89],
     'ratioOpts' :["divsym"],
-    'rpLegPos'  :[0.74,0.63,0.89,0.87],
+    'rpLegPos'  :[0.75,0.63,0.89,0.89],
 }
 
 btagConfig = {
-    'data'      :[btagMC, defaultDATA],
+    'data'      :[btagMC, defaultDATA, compareDATA1, compareDATA2],
     'xTitle'    :"",
     'yTitle'    :"Events",
-    'stLegPos'  :[0.75,0.75,0.89,0.84],
+    'stLegPos'  :[0.75,0.58,0.89,0.89],
     'ratioOpts' :["divsym"],
-    'rpLegPos'  :[0.75,0.75,0.89,0.84],
+    'rpLegPos'  :[0.75,0.63,0.89,0.89],
 }
 
 profConfig = {# No MC
     'data'      :[defaultDATA],
     'xTitle'    :"",
     'yTitle'    :"Events",
-    'stLegPos'  :[0.75,0.58,0.89,0.84],
+    'stLegPos'  :[0.75,0.58,0.89,0.89],
     'ratioOpts' :["divsym"],
-    'rpLegPos'  :[0.74,0.63,0.89,0.87],
+    'rpLegPos'  :[0.75,0.63,0.89,0.89],
 }
 
 ttbarPlots=[
@@ -240,3 +266,14 @@ plots['ttbar_nPV_nominal']['stExtra']="""
 plots['ttbar_nPV_nominal']['rpExtra']="""
 #rp.GetYaxis().SetMinimum(1)
 """
+
+# Final de-select plots
+regexDeselPatterns = [
+    "prof_.*",
+]
+regexDesel = [ re.compile(e) for e in regexDeselPatterns ]
+for p in plots.keys():
+    for r in regexDesel:
+        if r.match(p):
+            plots.pop(p)
+

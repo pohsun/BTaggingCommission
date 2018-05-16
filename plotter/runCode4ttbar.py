@@ -278,7 +278,6 @@ def drawAll(args):
         os.makedirs("ttbar/Commissioning_plots")
 
     for pName, cfg in drawer.cfi.plots.iteritems():
-        print cfg
         drawer.draw(copy.deepcopy(cfg), isLog=False)
         drawer.draw(copy.deepcopy(cfg), isLog=True)
 
