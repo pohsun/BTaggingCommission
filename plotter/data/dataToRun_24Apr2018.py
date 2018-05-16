@@ -14,7 +14,7 @@ defaultLumi=41856. # In /pb, Full2017
 defalutPUWgtUrl="/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20180303_newJEC/CMSSW_9_4_1/src/RecoBTag/PerformanceMeasurements/test/ttbar/03Mar2018_DATA/merged_puWgtXsec69000.root"
 
 #Run2017_31Mar2018ReReco
-dataDir="/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2017/crab/24Apr2018_deepFlavour_MiniAODv2d93a314"
+dataDir="/eos/cms/store/group/phys_btag/Commissioning/TTbar/Run2017/crab/24Apr2018_deepFlavour_MiniAODv2/d93a314"
 dataset['runB-v1'] = {
     'xsec'              : -1,
     'ipath'             : [dataDir+'/MuonEG/crab_Data13TeV_MuonEG_2017B-v1'],
