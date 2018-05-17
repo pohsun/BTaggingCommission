@@ -24,7 +24,8 @@ ttbarMC = {
     'fillColor' :[kRed+1, kAzure-2, kMagenta, kGreen+4, kOrange+2, kBlue+2, 1],
     'drawOpt'   :"HIST",
     'isData'    :False,
-    'forceNorm' :1.034/41.856,
+    # 'forceNorm' :"1.034/41.856", # Scale lumi to Run2018
+    'forceNorm' :"forceNormS = cfg['data'][1]['hTotal'].GetSumOfWeights()/convHStackToHist(data['hTotal']).GetSumOfWeights()", # Scale to data norm
 }
 
 btagMC = {
@@ -34,7 +35,8 @@ btagMC = {
     'fillColor' :[2, kYellow, 8, 4, 1],
     'drawOpt'   :"HIST",
     'isData'    :False,
-    'forceNorm' :1.034/41.856,
+    # 'forceNorm' :"1.034/41.856", # Scale lumi to Run2018
+    'forceNorm' :"forceNormS = cfg['data'][1]['hTotal'].GetSumOfWeights()/convHStackToHist(data['hTotal']).GetSumOfWeights()", # Scale to data norm
 }
 
 defaultDATA = {
@@ -44,7 +46,7 @@ defaultDATA = {
     'fillColor' :[[1,20],[1,20]],
     'drawOpt'   :"E1",
     'isData'    :True,
-    'forceNorm' : -1 ,
+    'forceNorm' : "forceNormS = 1" ,
 }
 
 compareDATA1 = {
@@ -54,7 +56,7 @@ compareDATA1 = {
     'fillColor' :[[kYellow,20],[kYellow,20]],
     'drawOpt'   :"E1",
     'isData'    :True,
-    'forceNorm' : 1.034/41.856,
+    'forceNorm' : "forceNormS = 1.034/41.856",
 }
 
 compareDATA2 = {
@@ -64,12 +66,12 @@ compareDATA2 = {
     'fillColor' :[[3,20],[3,20]],
     'drawOpt'   :"E1",
     'isData'    :True,
-    'forceNorm' : 1.034/41.856,
+    'forceNorm' : "forceNormS = 1.034/41.856",
 }
 
 # Define config for plotters
 ttbarConfig = {
-    'data'      :[ttbarMC, defaultDATA, compareDATA1, compareDATA2],
+    'data'      :[ttbarMC, defaultDATA, compareDATA1],
     'xTitle'    :"",
     'yTitle'    :"Events",
     'stLegPos'  :[0.75,0.58,0.89,0.89],
@@ -78,7 +80,7 @@ ttbarConfig = {
 }
 
 btagConfig = {
-    'data'      :[btagMC, defaultDATA, compareDATA1, compareDATA2],
+    'data'      :[btagMC, defaultDATA, compareDATA1],
     'xTitle'    :"",
     'yTitle'    :"Events",
     'stLegPos'  :[0.75,0.58,0.89,0.89],
@@ -162,6 +164,7 @@ btagPlots =[
     "btag_tag_CSVv2_nominal",
     "btag_tag_cMVAv2_nominal",
     "btag_tag_DeepCSVBDisc_nominal",
+    "btag_tag_DeepFlavourBDisc_nominal",
     "btag_tag_DeepFlavourCvsB_nominal",
     "btag_tag_DeepFlavourCvsL_nominal",
     "btag_tag_CvsB_nominal",
@@ -254,6 +257,7 @@ plots['btag_tag_CSV_nominal'            ]['xTitle']= "CSVv2(AVR) discriminator"
 plots['btag_tag_CSVv2_nominal'          ]['xTitle']= "CSVv2 discriminator"
 plots['btag_tag_cMVAv2_nominal'         ]['xTitle']= "cMVAv2 discriminator"
 plots['btag_tag_DeepCSVBDisc_nominal'   ]['xTitle']= "DeepCSV b discriminator"
+plots['btag_tag_DeepFlavourBDisc_nominal']['xTitle']="B-tag DeepFlavourBDisc discriminator"
 plots['btag_tag_DeepFlavourCvsB_nominal']['xTitle']= "C-tag DeepFlavourCvsB discriminator"
 plots['btag_tag_DeepFlavourCvsL_nominal']['xTitle']= "C-tag DeepFlavourCvsL discriminator"
 plots['btag_tag_CvsB_nominal'           ]['xTitle']= "C-tag CvsB discriminator"

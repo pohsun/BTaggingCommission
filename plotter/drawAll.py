@@ -3,10 +3,10 @@
 
 import os,imp,math
 from ROOT import TFile
-from ROOT import TCanvas, TLegend, TLatex
+from ROOT import TCanvas, TLegend, TLatex, TAxis
 from ROOT import TStyle, kWhite
-from ROOT import TAxis
 from ROOT import TH1D, THStack, TRatioPlot
+from ROOT import TList, TIter
 
 cfi = imp.load_source("cfi","drawAll_cfi.py")
 TH1D.SetDefaultSumw2(True)
@@ -211,6 +211,16 @@ def drawLatex(x, y, word):
     latex.SetTextAlign(11)#LB
     latex.SetLineWidth(2)
     latex.DrawLatexNDC(x, y, word)
+    pass
+
+def convHStackToHist(hs):
+    hsIter = TIter(hs.GetHists())
+    hout = hsIter().Clone("{0}_toHist".format(hs.GetName()))
+    h = hsIter.Next()
+    while h:
+        hout.Add(h)
+        h=hsIter.Next()
+    return hout
 
 def draw(cfg, isLog=False):
     SetTdrStyle()
@@ -248,16 +258,15 @@ def draw(cfg, isLog=False):
                     data['hTotal'] = THStack(hTotalName,"")
                     data['hTotal'].Add(hist)
 
-        # Set normalization
-        if data['forceNorm'] == 0 and dIdx != 0:
-            # TODO: Scale THStack
-            data['hTotal'].Scale(cfg['data'][0]['hTotal'].GetSumOfWeights()/data['hTotal'].GetSumOfWeights())
-        elif data['forceNorm'] > 0:
-            if data['hTotal'].InheritsFrom("THStack"):
-                for h in data['hist']:
-                    h.Scale(data['forceNorm'])
-            else:
-                data['hTotal'].Scale(data['forceNorm'])
+    # Post-processing of hTotal
+    for dIdx, data in enumerate(cfg['data']):
+        exec data['forceNorm']
+        if data['hTotal'].InheritsFrom("THStack"):
+            for h in data['hist']:
+                h.Scale(forceNormS)
+        else:
+            data['hTotal'].Scale(forceNormS)
+
         if not isLog:
             data['hTotal'].SetMinimum(0)
 
