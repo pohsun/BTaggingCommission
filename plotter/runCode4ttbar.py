@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import sys, os, shutil, string, re, copy, imp
 import argparse
 from subprocess import Popen, PIPE, call
@@ -17,7 +19,7 @@ For more info: ./runAnalyzer4ttbar.py --help
 rootDir         = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros")
 scriptDir       = "/".join(os.path.realpath(__file__).split('/')[:-1])
 eosCmd          = '/usr/bin/eos'
-defaultQueue    = '8nh'
+defaultQueue    = 'workday'
 batchSize       = 50
 CWD             = os.environ['PWD']
 
@@ -55,7 +57,7 @@ def compileMacros(args):
 def puEstimation(args):
     isPUMixerUpdated = raw_input("Is Mixing module in runPileupEstimation.py updated? [y/n] ")
     if isPUMixerUpdated != 'y':
-        print "Please update the MixingModule first. Abort."
+        print("Please update the MixingModule first. Abort.")
         return
     else:
         json = os.path.normpath(args.json)
@@ -74,23 +76,25 @@ def createBatch(args):
     defaultQueue    = "8nh"
     compileMacros(args)
 
-    # Prepare runtime script
-    batchTemplate = """#!/usr/bin/env bash
+    # Prepare submission script
+    subTemplate = """
+getenv      = True
+output      = DATASET.$(ProcId).out
+error       = DATASET.$(ProcId).err
+log         = DATASET.log
++JobFlavour = {1}
 
-#BSUB-q QUEUE
-#BSUB-J JOBNAME
-#BSUB-c 60
+executable  = {0}/runCode4ttbar.py
+arguments   = run $(cfg) --pu $(puwgt)
+transfer_input_files = {0}/runJob_cfi.py
+initialdir  = WORKDIR
 
-cd WORKDIR
-eval `scramv1 runtime -sh`
-
-python {0} run CFG --pu "PUWGT"
-""".format(os.path.realpath(__file__))
+queue cfg,puwgt from JOBS.data
+""".format(scriptDir, args.queue)
 
     # Load dataset, groupdata
-    handle = open(os.path.join(CWD,args.datacard))
-    exec(handle)
-    handle.close()
+    with open(os.path.join(CWD,args.datacard)) as handle:
+        exec(handle)
 
     # create list of input files
     batchDir = os.path.join(rootDir, "batch")
@@ -99,7 +103,7 @@ python {0} run CFG --pu "PUWGT"
     for datasetName, data in dataset.iteritems():
         # if datasetName not in ['runE_v1','runF_v1']:
         #     continue
-        print "Creating batch jobs for {0}.".format(datasetName)
+        print("Creating batch jobs for {0}.".format(datasetName))
         # Get full list of input files
         iFileList = []
         for iPath in data['ipath']:
@@ -109,28 +113,36 @@ python {0} run CFG --pu "PUWGT"
         puWgtUrl = data['puWgtUrl'] if data['puWgtUrl'].startswith('/') else os.path.join(CWD,data['puWgtUrl'])
 
         # Split jobs
-        for iPart in range(0,(len(iFileList)-1)/batchSize+1):
-            oFileListName = "flist_{0}_part{1:02d}.py".format(datasetName,iPart);
-            with open(os.path.join(batchDir,oFileListName),'w+') as oFileList:
-                oFileList.write("dataset = '{0}_part{1:02d}'\n".format(datasetName,iPart))
-                oFileList.write("isData  = {0}\n".format("True" if data['xsec'] == -1 else "False"))
-                oFileList.write("inputFiles = [\n")
-                for iFile in iFileList[iPart*batchSize:batchSize+iPart*batchSize]:
-                    oFileList.write("    '"+iFile+"',\n")
-                oFileList.write("]\n")
-            os.chmod(os.path.join(batchDir,oFileListName),0644)
+        jobsScriptName = os.path.join(batchDir,"jobs_{0}.data".format(datasetName))
+        with open(jobsScriptName,'w+') as jobsScript:
+            for iPart in range(0,(len(iFileList)-1)/batchSize+1):
 
-            batchScript = re.sub('QUEUE'        , args.queue                                    , batchTemplate)
-            batchScript = re.sub('WORKDIR'      , rootDir                                       , batchScript)
-            batchScript = re.sub('JOBNAME'      , "{0}_p{1:02d}".format(datasetName,iPart)      , batchScript)
-            batchScript = re.sub("CFG"          , os.path.join(batchDir,oFileListName)          , batchScript)
-            batchScript = re.sub("PUWGT"        , puWgtUrl                                      , batchScript)
-            oBatchScriptName=os.path.join(batchDir,"batchJob_{0}_part{1:02d}.sh".format(datasetName,iPart))
-            with open(oBatchScriptName,'w+') as batchScriptFile:
-                batchScriptFile.write(batchScript)
-            os.chmod(oBatchScriptName,0755)
-            if args.submit and not os.path.exists(os.path.join(rootDir,"output_{0}_part{1:02d}.root".format(datasetName,iPart))):
-                call("bsub -q {0} {1}".format(args.queue, oBatchScriptName),shell=True)
+                # Config for a single job
+                oFileListName = "flist_{0}_part{1:02d}.py".format(datasetName,iPart);
+                with open(os.path.join(batchDir,oFileListName),'w+') as oFileList:
+                    oFileList.write("dataset = '{0}_part{1:02d}'\n".format(datasetName,iPart))
+                    oFileList.write("isData  = {0}\n".format("True" if data['xsec'] == -1 else "False"))
+                    oFileList.write("inputFiles = [\n")
+                    for iFile in iFileList[iPart*batchSize:batchSize+iPart*batchSize]:
+                        oFileList.write("    '"+iFile+"',\n")
+                    oFileList.write("]\n")
+                os.chmod(os.path.join(batchDir,oFileListName),0644)
+
+                # Config for HTCondor
+                jobsScript.write("{0}, {1}\n".format(
+                    os.path.join(batchDir,oFileListName),
+                    puWgtUrl))
+
+        subScriptName = os.path.join(batchDir,"jobs_{0}.sub".format(datasetName))
+        with open(subScriptName, 'w+') as subScript:
+            sc = re.sub('WORKDIR'      , rootDir       , subTemplate)
+            sc = re.sub('JOBS.data'    , jobsScriptName, sc)
+            sc = re.sub('DATASET'      , datasetName   , sc)
+            subScript.write(sc)
+
+        # Submit jobs
+        if args.submit and not os.path.exists(os.path.join(rootDir,"output_{0}_part{1:02d}.root".format(datasetName,iPart))):
+            call("condor_submit {1}".format(args.queue, subScriptName),shell=True)
     pass
 
 def runJob(args):
@@ -168,6 +180,7 @@ def runJob(args):
             run.AddTrigChannel(0)
 
     # Load cut, tagger WPs
+    print(scriptDir)
     runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py"))
     for eraName, era in runJobConfig.runEras.iteritems():
         run.AddRunRange(era[0])
@@ -188,7 +201,7 @@ def hadd(iDir, oDir, datasetName):
     if not os.path.exists(oDir):
         os.mkdir(oDir)
     cmd = "hadd -f {0}/output_{2}.root {1}/output_{2}_part*.root".format(oDir, iDir, datasetName)
-    print cmd
+    print(cmd)
     call(cmd, shell=True)
     pass
 
@@ -218,14 +231,14 @@ def merge(args):
     # put all histograms together and insert event-independent weight
     for groupKey, groupVal in groupdata.iteritems():
         groupVal['xsec'] = [ (lambda x, idx: x if x > 0 else dataset[groupVal['dataset'][idx]]['xsec'])(x,idx) for idx, x in enumerate(groupVal['xsec']) ]
-        print groupKey, groupVal
+        print(groupKey, groupVal)
 
         final_histos = {}
         for datasetIdx, datasetKey in enumerate(groupVal['dataset']):
             input_root_file  = os.path.join(main_workdir,"output_{0}.root".format(datasetKey))
             if not os.path.isfile(input_root_file):
-                print 'ERROR: File ' + input_root_file + ' not found'
-                print 'Aborting'
+                print('ERROR: File ' + input_root_file + ' not found')
+                print('Aborting')
                 sys.exit(1)
 
             # open input ROOT file
@@ -239,7 +252,7 @@ def merge(args):
                 sf   = (hPuWgtNorms.GetBinContent(iBin)/hPuWgtNorms.GetBinContent(iBin+1)) if groupVal['xsec'][datasetIdx] > 0 else 1.
                 name = "_{0}".format(hPuWgtNorms.GetXaxis().GetBinLabel(iBin).split("_")[-1])
                 puWgtNormScale[name]=sf
-            print "{0:10} -- Events: {1:.3f} (all); xsec: {2:.3E}; scale: {3:.3E}".format(datasetKey, nEventsAll, dataset[datasetKey]['xsec'], lumiScale*puWgtNormScale['_nominal'])
+            print("{0:10} -- Events: {1:.3f} (all); xsec: {2:.3E}; scale: {3:.3E}".format(datasetKey, nEventsAll, dataset[datasetKey]['xsec'], lumiScale*puWgtNormScale['_nominal']))
 
             # get the number of histograms
             nHistos = root_file.GetListOfKeys().GetEntries()
@@ -263,10 +276,10 @@ def merge(args):
         output_root_file.cd()
         histos = final_histos.keys()
         histos.sort()
-        print "Writing histograms..."
+        print("Writing histograms...")
         for histo in histos:
             final_histos[histo].Write()
-        print 'Done'
+        print('Done')
 
     output_root_file.Close()
     pass
@@ -301,7 +314,7 @@ if __name__ == "__main__":
     subparserCreate.add_argument('datacard',
         help="Datacard to be processed")
     subparserCreate.add_argument("-q", "--queue", dest="queue", default=defaultQueue,
-        help="Queue name of LXBatch")
+        help="JobFlavour of HTCondor")
     subparserCreate.add_argument("-s", dest="submit", default=False, action="store_true",
         help="Submit the jobs")
 
