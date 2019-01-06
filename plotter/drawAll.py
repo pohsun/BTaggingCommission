@@ -267,8 +267,13 @@ def draw(cfg, isLog=False):
         else:
             data['hTotal'].Scale(forceNormS)
 
-        if not isLog:
+        if isLog:
+            data['hTotal'].SetMaximum(data['hTotal'].GetMaximum()*100.)
+            if data['hTotal'].GetMinimum()*10**5 > data['hTotal'].GetMaximum():
+                data['hTotal'].SetMinimum(data['hTotal'].GetMinimum()*0.01)
+        else:
             data['hTotal'].SetMinimum(0)
+            data['hTotal'].SetMaximum(data['hTotal'].GetMaximum()*1.5)
 
         # Create ratio plots
         if 'hRatio' in cfg.keys() and data['hTotal'].InheritsFrom("TH1"):

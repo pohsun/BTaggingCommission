@@ -3,17 +3,18 @@
 
 import os, re
 from copy import deepcopy
-from ROOT import kAzure, kRed, kMagenta, kGreen, kOrange, kBlue, kYellow
+from ROOT import kAzure, kRed, kMagenta, kGreen, kOrange, kBlue, kYellow, kTeal
 
 mergedInputFile = [
     os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all.root"),
+    os.path.expandvars("/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20180511_Run2018A/CMSSW_10_1_2_patch2/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all_11May2018.root"),
     os.path.expandvars("/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20180424_DeepFlavour/CMSSW_9_4_4/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all.root"),
-    os.path.expandvars("/afs/cern.ch/work/p/pchen/public/btaggingCommRun2/prod/20180424_DeepFlavour/CMSSW_9_4_4/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/output_all_17NovReReco_Fall17MC.root"),
 ]
 outputDir       = os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/test/BTagAnalyzerMacros/ttbar/Commissioning_plots")
 outputFormats   = ["pdf","png"]
 # lumi            = 41.86 # Full2017
-lumi            = 1.03 # Run2018A
+# lumi            = 1.03  # Early Run2018A
+lumi            = 7.63  # Run2018A+Early Run2018B
 isPrelim        = True
 
 # Define histogram groups
@@ -21,7 +22,7 @@ ttbarMC = {
     'postfix'   :["_ttbar","_dy","_st","_ww","_wz","_zz"],
     'fileIndex' :2,
     'legend'    :["t#bar{t}","DY","tW","WW","WZ","ZZ"],
-    'fillColor' :[kRed+1, kAzure-2, kMagenta, kGreen+4, kOrange+2, kBlue+2, 1],
+    'fillColor' :[kRed+1, kTeal, kOrange+1, kGreen-8, kMagenta+2, kBlue+2, 1],
     'drawOpt'   :"HIST",
     'isData'    :False,
     # 'forceNorm' :"1.034/41.856", # Scale lumi to Run2018
@@ -32,7 +33,7 @@ btagMC = {
     'postfix'   :["_b_mc","_pu_mc","_c_mc","_l_mc"],
     'fileIndex' :2,
     'legend'    :["b","PU","c","udsg"],
-    'fillColor' :[2, kYellow, 8, 4, 1],
+    'fillColor' :[2, 8, kOrange+1, 4, 1],
     'drawOpt'   :"HIST",
     'isData'    :False,
     # 'forceNorm' :"1.034/41.856", # Scale lumi to Run2018
@@ -40,7 +41,7 @@ btagMC = {
 }
 
 defaultDATA = {
-    'postfix'   :["_data"],
+    'postfix'   :["_data"], 
     'fileIndex' :0,
     'legend'    :["Run2018A"],
     'fillColor' :[[1,20],[1,20]],
@@ -52,18 +53,18 @@ defaultDATA = {
 compareDATA1 = {
     'postfix'   :["_data"],
     'fileIndex' :1,
-    'legend'    :["Run2017(31Mar2018ReReco)"],
-    'fillColor' :[[kYellow,20],[kYellow,20]],
+    'legend'    :["2017 (Re-miniAOD)"],
+    'fillColor' :[[kMagenta-3,43],[kMagenta-3,43]],
     'drawOpt'   :"E1",
     'isData'    :True,
     'forceNorm' : "forceNormS = 1.034/41.856",
 }
 
 compareDATA2 = {
-    'postfix'   :["_data"],
+    'postfix'   :["_data"], 
     'fileIndex' :2,
-    'legend'    :["Run2017(17Nov2017ReReco)"],
-    'fillColor' :[[3,20],[3,20]],
+    'legend'    :["2017 (17Nov2017)"],
+    'fillColor' :[[kGreen-5,21],[kGreen-5,21]],
     'drawOpt'   :"E1",
     'isData'    :True,
     'forceNorm' : "forceNormS = 1.034/41.856",
@@ -76,7 +77,7 @@ ttbarConfig = {
     'yTitle'    :"Events",
     'stLegPos'  :[0.75,0.58,0.89,0.89],
     'ratioOpts' :["divsym"],
-    'rpLegPos'  :[0.75,0.63,0.89,0.89],
+    'rpLegPos'  :[0.60,0.65,0.89,0.89],
 }
 
 btagConfig = {
@@ -85,7 +86,7 @@ btagConfig = {
     'yTitle'    :"Events",
     'stLegPos'  :[0.75,0.58,0.89,0.89],
     'ratioOpts' :["divsym"],
-    'rpLegPos'  :[0.75,0.63,0.89,0.89],
+    'rpLegPos'  :[0.60,0.65,0.89,0.89],
 }
 
 profConfig = {# No MC
