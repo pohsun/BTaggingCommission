@@ -13,6 +13,8 @@ runEras={
     'Run2018D':[320394,325114],
 }
 
+skipTriggers = []
+
 tagWPs = {}
 tagWPs['CSVv2T'] = {
     'varName':"Jet_CombIVF",

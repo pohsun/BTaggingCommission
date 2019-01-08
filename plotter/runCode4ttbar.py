@@ -171,17 +171,16 @@ def runJob(args):
     url = args.puWgtUrl if os.path.expandvars(args.puWgtUrl).startswith('/') else os.path.join(CWD,args.puWgtUrl)
     run = CommPlotProducer4ttbar(tree,url,"output_{0}.root".format(dataset))
 
-    # Load trigger config
-    ttbarConfig = imp.load_source("ttbarConfig",os.path.expandvars("${CMSSW_BASE}/src/RecoBTag/PerformanceMeasurements/python/TTbarSelectionProducer_cfi.py"))
-    for chanIdx, chan in enumerate(ttbarConfig.ttbarselectionproducer.trigChannels):
-        if chanIdx not in []: # Skip prescaled and non-emu trigger bits
-            run.AddTrigChannel(chan)
-        else:
-            run.AddTrigChannel(0)
-
-    # Load cut, tagger WPs
-    print(scriptDir)
-    runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py"))
+    # Load trigger, cut, tagger WPs
+    runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py")
+    if len(inputFiles) > 0:
+        f = TFile.Open(inputFiles[0])
+        triggerpaths = f.Get("ttbarselectionproducer/triggerpaths")
+        for iTrg in range(1, triggerpaths.GetNbinsX()+1):
+            if triggerpaths.GetXaxis().GetBinLabel(iTrg) not in runJobConfig.skipTriggers: # Skip prescaled and non-emu trigger bits
+                run.AddTrigChannel(triggerpaths.GetBinContent(iTrg))
+            else:
+                run.AddTrigChannel(0)
     for eraName, era in runJobConfig.runEras.iteritems():
         run.AddRunRange(era[0])
         run.AddRunRange(era[1])
