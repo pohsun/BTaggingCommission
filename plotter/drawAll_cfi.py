@@ -159,9 +159,10 @@ btagPlots =[
     "btag_pfelectron_eta_nominal",
     "btag_pfelectron_phi_nominal",
     "btag_pfelectron_ptrel_nominal",
-    "btag_tag_JP_nominal",
-    "btag_tag_JBP_nominal",
-    "btag_tag_CSV_nominal",
+    # "btag_tag_JP_nominal",
+    # "btag_tag_JBP_nominal",
+    # "btag_tag_TCHP_nominal",
+    # "btag_tag_CSV_nominal",
     "btag_tag_CSVv2_nominal",
     "btag_tag_cMVAv2_nominal",
     "btag_tag_DeepCSVBDisc_nominal",
@@ -170,7 +171,6 @@ btagPlots =[
     "btag_tag_DeepFlavourCvsL_nominal",
     "btag_tag_CvsB_nominal",
     "btag_tag_CvsL_nominal",
-    "btag_tag_TCHP_nominal",
 ]
 
 profPlots = [
@@ -252,9 +252,10 @@ plots['btag_pfelectron_pt_nominal'      ]['xTitle']= "p_{T} of PF electrons [GeV
 plots['btag_pfelectron_eta_nominal'     ]['xTitle']= "#eta of PF electrons"
 plots['btag_pfelectron_phi_nominal'     ]['xTitle']= "#phi of PF electrons"
 plots['btag_pfelectron_ptrel_nominal'   ]['xTitle']= "p_{T} rel. of PF electrons [GeV]"
-plots['btag_tag_JP_nominal'             ]['xTitle']= "JP discriminator"
-plots['btag_tag_JBP_nominal'            ]['xTitle']= "JBP discriminator"
-plots['btag_tag_CSV_nominal'            ]['xTitle']= "CSVv2(AVR) discriminator"
+# plots['btag_tag_JP_nominal'             ]['xTitle']= "JP discriminator"
+# plots['btag_tag_JBP_nominal'            ]['xTitle']= "JBP discriminator"
+# plots['btag_tag_TCHP_nominal'           ]['xTitle']= "TCHP discriminator"
+# plots['btag_tag_CSV_nominal'            ]['xTitle']= "CSVv2(AVR) discriminator"
 plots['btag_tag_CSVv2_nominal'          ]['xTitle']= "CSVv2 discriminator"
 plots['btag_tag_cMVAv2_nominal'         ]['xTitle']= "cMVAv2 discriminator"
 plots['btag_tag_DeepCSVBDisc_nominal'   ]['xTitle']= "DeepCSV b discriminator"
@@ -263,7 +264,6 @@ plots['btag_tag_DeepFlavourCvsB_nominal']['xTitle']= "C-tag DeepFlavourCvsB disc
 plots['btag_tag_DeepFlavourCvsL_nominal']['xTitle']= "C-tag DeepFlavourCvsL discriminator"
 plots['btag_tag_CvsB_nominal'           ]['xTitle']= "C-tag CvsB discriminator"
 plots['btag_tag_CvsL_nominal'           ]['xTitle']= "C-tag CvsL discriminator"
-plots['btag_tag_TCHP_nominal'           ]['xTitle']= "TCHP discriminator"
 
 plots['ttbar_nPV_nominal']['stExtra']="""
 #hStack.GetYaxis().SetMinimum(1)

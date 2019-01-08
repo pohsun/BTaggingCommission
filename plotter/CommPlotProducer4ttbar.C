@@ -141,21 +141,23 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
             int   jet_SV_multi  = round(GetBranch("Jet_SV_multi",selJetIdx));
 
                 // Taggers
-            float jet_TCHE              = GetBranch("Jet_Ip2P"                , selJetIdx);
-            float jet_TCHP              = GetBranch("Jet_Ip3P"                , selJetIdx);
-            float jet_JP                = GetBranch("Jet_ProbaP"              , selJetIdx);
-            float jet_JBP               = GetBranch("Jet_BprobP"              , selJetIdx);
-            float jet_SSV               = GetBranch("Jet_Svx"                 , selJetIdx);
-            float jet_SSVHP             = GetBranch("Jet_SvxHP"               , selJetIdx);
-            float jet_CSV               = GetBranch("Jet_CombSvx"             , selJetIdx);
+            //float jet_TCHE              = GetBranch("Jet_Ip2P"                , selJetIdx);
+            //float jet_TCHP              = GetBranch("Jet_Ip3P"                , selJetIdx);
+            //float jet_JP                = GetBranch("Jet_ProbaP"              , selJetIdx);
+            //float jet_JBP               = GetBranch("Jet_BprobP"              , selJetIdx);
+            //float jet_SSV               = GetBranch("Jet_Svx"                 , selJetIdx);
+            //float jet_SSVHP             = GetBranch("Jet_SvxHP"               , selJetIdx);
+            //float jet_CSV               = GetBranch("Jet_CombSvx"             , selJetIdx);
+
             float jet_CSVv2             = GetBranch("Jet_CombIVF"             , selJetIdx);
             float jet_cMVAv2            = GetBranch("Jet_cMVAv2"              , selJetIdx);
             float jet_DeepCSVBDisc      = GetBranch("Jet_DeepCSVBDisc"        , selJetIdx);
             float jet_DeepFlavourBDisc  = GetBranch("Jet_DeepFlavourBDisc"    , selJetIdx);
-            float jet_DeepFlavourCVSB   = GetBranch("Jet_DeepFlavourCvsBDisc" , selJetIdx);
-            float jet_DeepFlavourCVSL   = GetBranch("Jet_DeepFlavourCvsLDisc" , selJetIdx);
+
             float jet_CvsB              = GetBranch("CTag_Jet_CvsB"           , selJetIdx);
             float jet_CvsL              = GetBranch("CTag_Jet_CvsL"           , selJetIdx);
+            float jet_DeepFlavourCVSB   = GetBranch("Jet_DeepFlavourCvsBDisc" , selJetIdx);
+            float jet_DeepFlavourCVSL   = GetBranch("Jet_DeepFlavourCvsLDisc" , selJetIdx);
 
             bool  isPU       = false;
             if (!isData && GetBranch("Jet_genpt",selJetIdx) < 8) isPU=true;
@@ -182,13 +184,13 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
                 FillHistoBtag(TString::Format("btag_jet_eta_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_eta              , evtWgt);
                 FillHistoBtag(TString::Format("btag_sv_multi_0_%s"           , iterEvL->first.c_str()) , jet_flav , isPU , jet_SV_multi         , evtWgt);
 
-                FillHistoBtag(TString::Format("btag_tag_TCHE_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHE             , evtWgt);
-                FillHistoBtag(TString::Format("btag_tag_TCHP_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHP             , evtWgt);
-                FillHistoBtag(TString::Format("btag_tag_JP_%s"               , iterEvL->first.c_str()) , jet_flav , isPU , jet_JP               , evtWgt);
-                FillHistoBtag(TString::Format("btag_tag_JBP_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_JBP              , evtWgt);
-                FillHistoBtag(TString::Format("btag_tag_SSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSV              , evtWgt);
-                FillHistoBtag(TString::Format("btag_tag_SSVHP_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSVHP            , evtWgt);
-                FillHistoBtag(TString::Format("btag_tag_CSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSV              , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_TCHE_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHE             , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_TCHP_%s"             , iterEvL->first.c_str()) , jet_flav , isPU , jet_TCHP             , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_JP_%s"               , iterEvL->first.c_str()) , jet_flav , isPU , jet_JP               , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_JBP_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_JBP              , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_SSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSV              , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_SSVHP_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_SSVHP            , evtWgt);
+                //FillHistoBtag(TString::Format("btag_tag_CSV_%s"              , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSV              , evtWgt);
                 FillHistoBtag(TString::Format("btag_tag_CSVv2_%s"            , iterEvL->first.c_str()) , jet_flav , isPU , jet_CSVv2            , evtWgt);
                 FillHistoBtag(TString::Format("btag_tag_cMVAv2_%s"           , iterEvL->first.c_str()) , jet_flav , isPU , jet_cMVAv2           , evtWgt);
                 FillHistoBtag(TString::Format("btag_tag_DeepCSVBDisc_%s"     , iterEvL->first.c_str()) , jet_flav , isPU , jet_DeepCSVBDisc     , evtWgt);
@@ -390,6 +392,8 @@ void CommPlotProducer4ttbar::SetBranchAddress()
 {//{{{
 
     // Register branches for selectors
+    // Predefined variable groups 'Petr' in https://github.com/cms-btv-pog/RecoBTag-PerformanceMeasurements/blob/9_4_X/python/varGroups_cfi.py
+
     RegBranch("Run"                ) ;
     RegBranch("Evt"                ) ;
     RegBranch("nPV"                ) ;
@@ -419,6 +423,7 @@ void CommPlotProducer4ttbar::SetBranchAddress()
 
     RegBranch("Jet_nFirstTrack"    ) ;
     RegBranch("Jet_nLastTrack"     ) ;
+
     RegBranch("Track_pt"           ) ;
     RegBranch("Track_nHitAll"      ) ;
     RegBranch("Track_nHitPixel"    ) ;
@@ -452,20 +457,27 @@ void CommPlotProducer4ttbar::SetBranchAddress()
     RegBranch("PFElectron_ptrel"   ) ;
     RegBranch("PFElectron_deltaR"  ) ;
 
-    // Taggers
-    RegBranch("Jet_Ip2P"                ) ;
-    RegBranch("Jet_Ip3P"                ) ;
-    RegBranch("Jet_ProbaP"              ) ;
-    RegBranch("Jet_BprobP"              ) ;
-    RegBranch("Jet_Svx"                 ) ;
-    RegBranch("Jet_SvxHP"               ) ;
-    RegBranch("Jet_CombSvx"             ) ;
-    RegBranch("Jet_CombIVF"             ) ;
+    // Supported Taggers
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
+    // Run2016 b-tagger: CSVv2, DeepCSV, cMVAv2
+    // Run2017 b-tagger: CSVv2, DeepCSV, DeepFlavour
+    // Run2018 b-tagger: ?CSVv2, DeepCSV, DeepFlavour
+
+    //RegBranch("Jet_Ip2P"                ) ;
+    //RegBranch("Jet_Ip3P"                ) ;
+    //RegBranch("Jet_ProbaP"              ) ;
+    //RegBranch("Jet_BprobP"              ) ;
+    //RegBranch("Jet_Svx"                 ) ;
+    //RegBranch("Jet_SvxHP"               ) ;
+    //RegBranch("Jet_CombSvx"             ) ;// CSV
+
+    RegBranch("Jet_CombIVF"             ) ;// CSVv2
     RegBranch("Jet_cMVAv2"              ) ;
     RegBranch("Jet_DeepCSVBDisc"        ) ;
     RegBranch("Jet_DeepFlavourBDisc"    ) ;
     RegBranch("Jet_DeepFlavourCvsBDisc" ) ;
     RegBranch("Jet_DeepFlavourCvsLDisc" ) ;
+
     RegBranch("CTag_Jet_CvsB"           ) ;
     RegBranch("CTag_Jet_CvsL"           ) ;
 
