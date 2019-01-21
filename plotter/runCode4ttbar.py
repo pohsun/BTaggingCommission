@@ -101,8 +101,8 @@ queue cfg,puwgt from JOBS.data
     if not os.path.isdir(batchDir):
         os.makedirs(batchDir)
     for datasetName, data in dataset.iteritems():
-        if datasetName not in ['ww','wz']:
-            continue
+        # if datasetName not in ['ww','wz']:
+            # continue
         # Get full list of input files
         iFileList = []
         for iPath in data['ipath']:
