@@ -366,6 +366,10 @@ void CommPlotProducer4ttbar::Loop(bool isdata, TH1F* wgtcounter)
 
 void CommPlotProducer4ttbar::RegBranch(TString name)
 {//{{{
+    if (ch->GetLeaf(name.Data()) == 0){
+        printf("ERROR\t: Branch %s not found.\n", name.Data());
+        return;
+    }
     if (m_leaf.find(name.Data()) == m_leaf.end()){
         std::string leafType = ch->GetLeaf(name.Data())->GetTypeName();
         if ( leafType == "Int_t") {
@@ -503,8 +507,6 @@ float CommPlotProducer4ttbar::GetBranch(TString name, int index)
             default:
                 printf("ERROR\t: Parse vIndex %d failed.\n",vIndex);
         }
-    }else{
-        printf("ERROR\t: Branch %s not found!\n", name.Data());
     }
     //printf("DEBUG\t: GetBranch(\"%s\",%d)=%f\n",name.Data(), index, out);
     return out;

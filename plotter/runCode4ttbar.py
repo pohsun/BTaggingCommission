@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+from __future__ import print_function, division
 
 import sys, os, shutil, string, re, copy, imp
 import argparse
@@ -61,14 +61,14 @@ def puEstimation(args):
         return
     else:
         json = os.path.normpath(args.json)
-        puJson = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PileUp/pileup_latest.txt"
-        xsecs = [63000,65000,67000,69000,71000,73000,75000]
+        puJson = os.path.normpath(args.puJson)
+        xsecs = [65000,67000,69000,71000,73000]
 
         os.chdir(rootDir+'/../ttbar')
         for xs in xsecs:
             cmd = "python runPileupEstimation.py --mbXsec={1} --json={2} --puJson={3}".format(rootDir,str(xs),json,puJson)
             call(cmd, shell=True)
-            cmd = "mv {0} {1}".format("{0}/../ttbar/data/pileupWgts.root".format(rootDir), os.path.splitext(json)[0]+'_puWgtXsec'+str(xs)+'.root')
+            cmd = "mv {0}/pileupWgts.root {0}/pileupWgts_puWgtXsec{1}.root".format("{0}/../ttbar/data".format(rootDir), str(xs))
             call(cmd, shell=True)
     pass
 
@@ -101,13 +101,13 @@ queue cfg,puwgt from JOBS.data
     if not os.path.isdir(batchDir):
         os.makedirs(batchDir)
     for datasetName, data in dataset.iteritems():
-        # if datasetName not in ['runE_v1','runF_v1']:
-        #     continue
-        print("Creating batch jobs for {0}.".format(datasetName))
+        if datasetName not in ['ww','wz']:
+            continue
         # Get full list of input files
         iFileList = []
         for iPath in data['ipath']:
             iFileList += fileLister(iPath)
+        print("Creating batch jobs for {0}({1} files).".format(datasetName, len(iFileList)))
 
         data['puWgtUrl'] = os.path.expandvars(data['puWgtUrl'])
         puWgtUrl = data['puWgtUrl'] if data['puWgtUrl'].startswith('/') else os.path.join(CWD,data['puWgtUrl'])
@@ -115,7 +115,7 @@ queue cfg,puwgt from JOBS.data
         # Split jobs
         jobsScriptName = os.path.join(batchDir,"jobs_{0}.data".format(datasetName))
         with open(jobsScriptName,'w+') as jobsScript:
-            for iPart in range(0,(len(iFileList)-1)/batchSize+1):
+            for iPart in range(0,(len(iFileList)-1)//batchSize+1):
 
                 # Config for a single job
                 oFileListName = "flist_{0}_part{1:02d}.py".format(datasetName,iPart);
@@ -172,15 +172,16 @@ def runJob(args):
     run = CommPlotProducer4ttbar(tree,url,"output_{0}.root".format(dataset))
 
     # Load trigger, cut, tagger WPs
-    runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py")
+    runJobConfig = imp.load_source("runJobConfig",os.path.join(scriptDir,"runJob_cfi.py"))
     if len(inputFiles) > 0:
         f = TFile.Open(inputFiles[0])
         triggerpaths = f.Get("ttbarselectionproducer/triggerpaths")
         for iTrg in range(1, triggerpaths.GetNbinsX()+1):
             if triggerpaths.GetXaxis().GetBinLabel(iTrg) not in runJobConfig.skipTriggers: # Skip prescaled and non-emu trigger bits
-                run.AddTrigChannel(triggerpaths.GetBinContent(iTrg))
+                run.AddTrigChannel(int(round(triggerpaths.GetBinContent(iTrg))))
             else:
                 run.AddTrigChannel(0)
+        f.Close()
     for eraName, era in runJobConfig.runEras.iteritems():
         run.AddRunRange(era[0])
         run.AddRunRange(era[1])
@@ -307,6 +308,8 @@ if __name__ == "__main__":
     subparserPU.set_defaults(func=puEstimation)
     subparserPU.add_argument('json',
         help="LumiMask to be estimated.")
+    subparserPU.add_argument('puJson',
+        help="Pileup info used for scaling.")
 
     subparserCreate = subparsers.add_parser('create')
     subparserCreate.set_defaults(func=createBatch)
