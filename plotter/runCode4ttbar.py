@@ -62,7 +62,7 @@ def puEstimation(args):
     else:
         json = os.path.normpath(args.json)
         puJson = os.path.normpath(args.puJson)
-        xsecs = [65000,67000,69000,71000,73000]
+        xsecs = [69200,73500,80000]
 
         os.chdir(rootDir+'/../ttbar')
         for xs in xsecs:

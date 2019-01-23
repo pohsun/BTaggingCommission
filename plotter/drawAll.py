@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # vim:set sts=4 sw=4 fdm=indent foldlevel=0 foldnestmax=2 et:
 
+from __future__ import print_function
+
 import os,imp,math
 from ROOT import TFile
 from ROOT import TCanvas, TLegend, TLatex, TAxis
@@ -186,7 +188,7 @@ def drawLatexLumi(x=0.89,y=0.91):
     latex.SetTextFont (42)
     latex.SetTextAlign(31)#RB
     latex.SetLineWidth(2)
-    latex.DrawLatexNDC(x, y, "{0} fb^{{-1}} (#sqrt{{s}}=13 TeV)".format(cfi.lumi))
+    latex.DrawLatexNDC(x, y, "{0:.0f} fb^{{-1}} (#sqrt{{s}}=13 TeV)".format(cfi.lumi))
     pass
 
 def drawLatexSel(x=0.50, y=0.89, sel="e#mu channel #geq 2 jets"):
@@ -261,6 +263,7 @@ def draw(cfg, isLog=False):
     # Post-processing of hTotal
     for dIdx, data in enumerate(cfg['data']):
         exec data['forceNorm']
+
         if data['hTotal'].InheritsFrom("THStack"):
             for h in data['hist']:
                 h.Scale(forceNormS)
