@@ -1,6 +1,5 @@
 {
     "Data13TeV_MuonEG_2018A" : [ 1, 1, "/MuonEG/Run2018A-17Sep2018-v1/MINIAOD", "Data", 1, false, false, 0],
     "Data13TeV_MuonEG_2018B" : [ 1, 1, "/MuonEG/Run2018B-17Sep2018-v1/MINIAOD", "Data", 1, false, false, 0],
-    "Data13TeV_MuonEG_2018C" : [ 1, 1, "/MuonEG/Run2018C-17Sep2018-v1/MINIAOD", "Data", 1, false, false, 0],
-    "Data13TeV_MuonEG_2018D" : [ 1, 1, "/MuonEG/Run2018D-PromptReco-v2/MINIAOD", "Data", 1, false, false, 0]
+    "Data13TeV_MuonEG_2018C" : [ 1, 1, "/MuonEG/Run2018C-17Sep2018-v1/MINIAOD", "Data", 1, false, false, 0]
 }
